@@ -1,0 +1,14 @@
+# ToDo: decide what to upload from burgers_exact
+burgers_exact
+
+machine_learning_of_pdes.egg-info
+
+# test scripts
+scripts/run_FTCS/test.py
+scripts/run_HopfCole/test.py
+scripts/run_upwind/test.py
+
+.DS_Store
+.idea/
+
+venv
