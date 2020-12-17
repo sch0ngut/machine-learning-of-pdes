@@ -1,7 +1,7 @@
-# ToDo (2/2): Upload needed exact solutions from burgers_exact
 burgers_exact/solutions
 
-machine_learning_of_pdes.egg-info
+machine_learning_of_pdes.egg-info/
+venv/
 
 # test scripts
 scripts/run_FTCS/test.py
@@ -9,6 +9,4 @@ scripts/run_HopfCole/test.py
 scripts/run_upwind/test.py
 
 .DS_Store
-.idea/
-
-venv
+.idea
