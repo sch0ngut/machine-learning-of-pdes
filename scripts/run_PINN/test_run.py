@@ -7,4 +7,5 @@ np.random.seed(42)
 
 pinn = PINN()
 pinn.generate_training_data(n_initial=10, n_boundary=4)
-print(pinn.coll_points)
+loss_df = pinn.perform_training(max_n_epochs=3, min_train_loss=0.001, track_losses=True, batch_size=4)
+print(loss_df)
