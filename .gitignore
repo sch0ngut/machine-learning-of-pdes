@@ -4,9 +4,13 @@ burgers_exact
 machine_learning_of_pdes.egg-info
 
 # test scripts
-scripts/run_FTCS/test.py
-scripts/run_HopfCole/test.py
-scripts/run_upwind/test.py
+#scripts/run_FTCS/test_run.py
+#scripts/run_HopfCole/test_run.py
+#scripts/run_Upwind/test_run.py
+#scripts/run_PINN/test_run.py
+
+burgers_ml/__pycache__/
+
 
 .DS_Store
 .idea/
