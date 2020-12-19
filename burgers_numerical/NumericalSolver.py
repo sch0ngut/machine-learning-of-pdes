@@ -2,6 +2,8 @@ import numpy as np
 import scipy.io
 from abc import ABC, abstractmethod
 
+from util.data_loader import data_loader
+
 
 class NumericalSolver(ABC):
     def __init__(self, num_spatial, num_temporal, nu=1/(100*np.pi), **kwargs):
@@ -24,9 +26,7 @@ class NumericalSolver(ABC):
         self.U[:, 0] = self.u0
 
         # Load exact
-        data = scipy.io.loadmat(
-            f'burgers_exact/solutions/burgers_exact_N_t={self.K+1}_N_x={self.H+1}.mat')
-        self.u_exact = np.real(data['mysol'])
+        self.u_exact = data_loader(self.H, self.K)
 
     @abstractmethod
     def time_integrate(self):

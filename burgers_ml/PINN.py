@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import scipy.io
 
+from util.data_loader import data_loader
+
 
 class PINN:
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
@@ -35,9 +37,7 @@ class PINN:
         self.network.add(tf.keras.layers.Dense(1))
 
         # Network evaluation
-        exact_data = scipy.io.loadmat(
-            f'burgers_exact/solutions/burgers_exact_N_t={K + 1}_N_x={H + 1}.mat')
-        u_exact = np.real(exact_data['mysol']).T
+        u_exact = data_loader(H, K).T
         t = np.linspace(0, 1, K + 1)
         x = np.linspace(-1, 1, H + 1)
         X, T = np.meshgrid(x, t)
