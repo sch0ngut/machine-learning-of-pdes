@@ -1,4 +1,3 @@
-# ToDo (2/2): Upload needed exact solutions from burgers_exact
 burgers_exact/solutions/
 
 machine_learning_of_pdes.egg-info/
@@ -14,4 +13,4 @@ __pycache__/
 *.pyc
 
 .DS_Store
-.idea/
+.idea
