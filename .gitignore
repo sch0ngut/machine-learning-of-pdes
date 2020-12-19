@@ -1,12 +1,16 @@
-burgers_exact/solutions
+burgers_exact/solutions/
 
 machine_learning_of_pdes.egg-info/
 venv/
 
 # test scripts
-scripts/run_FTCS/test.py
-scripts/run_HopfCole/test.py
-scripts/run_upwind/test.py
+#scripts/run_FTCS/test_run.py
+#scripts/run_HopfCole/test_run.py
+#scripts/run_Upwind/test_run.py
+#scripts/run_PINN/test_run.py
+
+__pycache__/
+*.pyc
 
 .DS_Store
 .idea
