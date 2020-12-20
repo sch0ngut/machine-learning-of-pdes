@@ -1,11 +1,17 @@
 import numpy as np
 from scipy import linalg
-
 from burgers_numerical.NumericalSolver import NumericalSolver
 
 
 class Upwind(NumericalSolver):
-    def __init__(self, n_spatial, n_temporal, order=1, nu=1/(100*np.pi), **kwargs):
+    def __init__(self, n_spatial: int, n_temporal: int, order: int = 1, nu: float = 1/(100*np.pi), **kwargs) -> None:
+        """
+        :param n_spatial: Number of spatial discretisation points
+        :param n_temporal: Number of temporal discretisation points
+        :param order: The order of the upwind scheme. Should be either 1 or 2
+        :param nu: The viscosity parameter of the Burgers' equation
+        :param kwargs: allows to pass a vector of initial values via the argument u0
+        """
         super().__init__(n_spatial, n_temporal, nu, **kwargs)
         self.order = order
 
@@ -17,7 +23,7 @@ class Upwind(NumericalSolver):
         self.A = np.array([upper, main, lower])
         self.A_inv_band = linalg.solve_banded((1, 1,), self.A, np.eye(self.n_spatial - 2))
 
-    def convection_vec(self, u):
+    def convection_vec(self, u) -> np.array:
         """
         Calculates the upwind term at a given time point
 
@@ -66,7 +72,10 @@ class Upwind(NumericalSolver):
 
         return u_tilde / self.h
 
-    def time_integrate(self):
+    def time_integrate(self) -> None:
+        """
+        Forward Euler time integrator
+        """
         for n in range(self.n_temporal - 1):
             u_n = self.u[:, n]
             u_n_tilde = self.convection_vec(u_n)

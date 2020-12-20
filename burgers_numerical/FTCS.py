@@ -5,6 +5,12 @@ from burgers_numerical.NumericalSolver import NumericalSolver
 
 class FTCS(NumericalSolver):
     def __init__(self, n_spatial, n_temporal, nu=1/(100*np.pi), **kwargs):
+        """
+        :param n_spatial: Number of spatial discretisation points
+        :param n_temporal: Number of temporal discretisation points
+        :param nu: The viscosity parameter of the Burgers' equation
+        :param kwargs: allows to pass a vector of initial values via the argument u0
+        """
         super().__init__(n_spatial, n_temporal, nu, **kwargs)
 
         # Design matrices
@@ -19,7 +25,11 @@ class FTCS(NumericalSolver):
         # self.A = sparse.diags([self.c, 1 - 2 * self.c, self.c], [-1, 0, 1], shape=(self.H + 1, self.H + 1)).toarray()
         # self.B = sparse.diags([-self.d, 0, self.d], [-1, 0, 1], shape=(self.H+1, self.H+1)).toarray()
 
-    def time_integrate(self):
+    def time_integrate(self) -> None:
+        """
+        Forward Euler time integrator
+        """
+
         for n in range(self.n_temporal - 1):
             u_n = self.u[:, n]
             u_n_inner = u_n[1:self.n_spatial-1]
