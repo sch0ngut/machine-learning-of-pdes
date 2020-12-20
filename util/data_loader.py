@@ -1,5 +1,5 @@
 from termcolor import cprint
-import scipy
+import scipy.io
 import numpy as np
 import sys
 

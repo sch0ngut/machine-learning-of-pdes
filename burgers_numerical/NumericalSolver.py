@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io
 from abc import ABC, abstractmethod
 
 from util.data_loader import data_loader
