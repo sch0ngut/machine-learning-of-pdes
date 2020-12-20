@@ -3,20 +3,21 @@ from burgers_numerical.Upwind import Upwind
 
 
 # Order of the upwind scheme: either 1 or 2
-order = 2
+order = 1
 
 # Discretisation
-H_vec = [160, 320, 640, 1280, 2560, 5120]
-K = 10**4
+n_spatial_vec = [161, 321, 641, 1281, 2561]
+n_temporal = 10**3+1
+m = len(n_spatial_vec)
 
 # Error vectors initialisation
-l_2_errors = np.zeros(len(H_vec))
-l_max_errors = np.zeros(len(H_vec))
+l_2_errors = np.zeros(m)
+l_max_errors = np.zeros(m)
 
 # Compute solution for each discretisation
-for i, H in enumerate(H_vec):
-    print(H)
-    upwind = Upwind(num_spatial=H, num_temporal=K, order=order)
+for i, n_spatial in enumerate(n_spatial_vec):
+    print(n_spatial)
+    upwind = Upwind(n_spatial=n_spatial, n_temporal=n_temporal, order=order)
     upwind.time_integrate()
     l_2_errors[i] = upwind.get_l2_error()
     l_max_errors[i] = upwind.get_l_max_error()
@@ -28,6 +29,6 @@ with np.printoptions(formatter={'float': lambda x: format(x, '6.2e')}):
 
 # Calculate convergence rates
 with np.printoptions(precision=4, suppress=True):
-    print(np.log(l_2_errors[0:(len(H_vec)-1)]/l_2_errors[1:len(H_vec)])/np.log(2))
-    print(np.log(l_max_errors[0:(len(H_vec)-1)]/l_max_errors[1:len(H_vec)])/np.log(2))
+    print(np.log(l_2_errors[0:(m-1)]/l_2_errors[1:m])/np.log(2))
+    print(np.log(l_max_errors[0:(m-1)]/l_max_errors[1:m])/np.log(2))
 

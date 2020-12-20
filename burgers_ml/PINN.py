@@ -83,7 +83,7 @@ class PINN:
             iter(self.batch_and_split_data(self.boundary_train_data)))
 
     def perform_training(self, max_n_epochs=500, min_train_loss=0.01, batch_size='full',
-                         optimizer=tf.keras.optimizers.Adam(), track_losses=True):
+                         optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> pd.DataFrame:
         """
         Trains the network until a maximum given number of epochs or minimum loss on the training data is achieved.
 

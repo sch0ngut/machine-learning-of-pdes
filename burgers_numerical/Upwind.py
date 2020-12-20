@@ -5,17 +5,17 @@ from burgers_numerical.NumericalSolver import NumericalSolver
 
 
 class Upwind(NumericalSolver):
-    def __init__(self, num_spatial, num_temporal, order=1, nu=1/(100*np.pi), **kwargs):
-        super().__init__(num_spatial, num_temporal, nu, **kwargs)
+    def __init__(self, n_spatial, n_temporal, order=1, nu=1/(100*np.pi), **kwargs):
+        super().__init__(n_spatial, n_temporal, nu, **kwargs)
         self.order = order
 
         # Design matrix
         self.c = (self.k * self.nu) / (self.h ** 2)
-        upper = np.concatenate((np.zeros(1), np.repeat(-self.c, self.H - 2)))
-        main = np.repeat(1 + 2 * self.c, self.H - 1)
-        lower = np.concatenate((np.repeat(-self.c, self.H - 2), np.zeros(1)))
+        upper = np.concatenate((np.zeros(1), np.repeat(-self.c, self.n_spatial - 3)))
+        main = np.repeat(1 + 2 * self.c, self.n_spatial - 2)
+        lower = np.concatenate((np.repeat(-self.c, self.n_spatial - 3), np.zeros(1)))
         self.A = np.array([upper, main, lower])
-        self.A_inv_band = linalg.solve_banded((1, 1,), self.A, np.eye(self.H - 1))
+        self.A_inv_band = linalg.solve_banded((1, 1,), self.A, np.eye(self.n_spatial - 2))
 
     def convection_vec(self, u):
         """
@@ -67,9 +67,9 @@ class Upwind(NumericalSolver):
         return u_tilde / self.h
 
     def time_integrate(self):
-        for n in range(self.K):
-            u_n = self.U[:, n]
+        for n in range(self.n_temporal - 1):
+            u_n = self.u[:, n]
             u_n_tilde = self.convection_vec(u_n)
-            self.U[1:self.H, n+1] = self.A_inv_band.dot(u_n[1:self.H] - self.k * u_n_tilde)
-            self.U[0, n+1] = self.U[0, n - 1]
-            self.U[self.H, n+1] = self.U[self.H, n - 1]
+            self.u[1:self.n_spatial-1, n+1] = self.A_inv_band.dot(u_n[1:self.n_spatial-1] - self.k * u_n_tilde)
+            self.u[0, n+1] = self.u[0, n - 1]
+            self.u[self.n_spatial-1, n+1] = self.u[self.n_spatial-1, n - 1]
