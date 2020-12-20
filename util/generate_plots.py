@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
@@ -103,3 +104,21 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     # Save
     if savefig_path:
         plt.savefig(savefig_path, dpi=1000)
+
+
+def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None) -> None:
+    """
+    Generates a plot of the losses and against the epochs
+
+    :param loss_df: The data frame containing the different losses in the columns and the epochs as indices
+    :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired.
+    """
+    loss_df.plot()
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend()
+
+    if savefig_path:
+        plt.savefig(savefig_path)
+    else:
+        plt.show()

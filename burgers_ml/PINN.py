@@ -7,15 +7,16 @@ from util.data_loader import data_loader
 
 class PINN:
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
-                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), n_spatial: int = 320, n_temporal: int = 100) -> None:
+                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), n_spatial: int = 321,
+                 n_temporal: int = 101) -> None:
         """
         :param act_fun: Activation function at each node of the neural network
         :param n_nodes: Number of nodes of each hidden layer
         :param n_layers: Number of hidden layers
         :param n_coll: Number of collocation points used to evaluate the regularisation term during model training
         :param loss_obj: The loss function
-        :param n_spatial: n_spatial+1: Number of spatial discretisation points used for model evaluation
-        :param n_temporal: n_temporal+1: Number of temporal discretisation points used for model evaluation
+        :param n_spatial: Number of spatial discretisation points used for model evaluation
+        :param n_temporal: Number of temporal discretisation points used for model evaluation
         """
 
         # Network parameters
@@ -37,11 +38,13 @@ class PINN:
         self.n_spatial = n_spatial
         self.n_temporal = n_temporal
         self.u_exact = data_loader(self.n_spatial, self.n_temporal).T
-        self.t = np.linspace(0, 1, self.n_temporal + 1)
-        self.x = np.linspace(-1, 1, self.n_spatial + 1)
+        self.t = np.linspace(0, 1, self.n_temporal)
+        self.x = np.linspace(-1, 1, self.n_spatial)
         x_mesh, t_mesh = np.meshgrid(self.x, self.t)
         self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
         self.eval_tar = self.u_exact.flatten()[:, None]
+        print(self.eval_feat.shape)
+        print(self.eval_tar.shape)
 
         # Training data initialisation
         self.train_data = pd.DataFrame()
@@ -153,7 +156,7 @@ class PINN:
         :return: The predictions as an array
         """
         preds = self.network(self.eval_feat)
-        return np.reshape(preds, (self.n_temporal + 1, self.n_spatial + 1))
+        return np.reshape(preds, (self.n_temporal, self.n_spatial))
 
     def get_coll_loss(self) -> tf.Tensor:
         """
