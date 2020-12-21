@@ -10,7 +10,10 @@ def data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
 
     :param n_spatial: number of spatial discretisation points
     :param n_temporal: number of temporal discretisation points
-    :return: The exact solution as a numpy array
+    :return:
+        x: (1 x n_spatial) array with the x-coordinates
+        t: (1 x nn_temporal) array with the t-coordinates
+        u: (n_spatial x n_temporal) array with the exact solution
     """
     try:
         data = scipy.io.loadmat(

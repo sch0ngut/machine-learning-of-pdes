@@ -32,7 +32,6 @@ class NumericalSolver(ABC):
 
         # Load exact
         _, _, self.u_exact = data_loader(self.n_spatial, self.n_temporal)
-        # self.u_exact = self.u_exact.T
 
     @abstractmethod
     def time_integrate(self) -> None:

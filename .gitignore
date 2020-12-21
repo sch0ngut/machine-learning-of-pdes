@@ -2,8 +2,19 @@ burgers_exact/solutions/
 burgers_exact/solutions_old/
 burgers_exact/main.m~
 
+!/burgers_exact/solutions/burgers_exact_K=100_H=320.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=160.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=320.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=640.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=1280.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=2560.mat
+!/burgers_exact/solutions/burgers_exact_K=1001_H=5120.mat
+
+
 machine_learning_of_pdes.egg-info/
 venv/
+
+tests/
 
 # test scripts
 #scripts/run_FTCS/test_run.py
