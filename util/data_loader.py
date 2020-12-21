@@ -10,12 +10,15 @@ def data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
 
     :param n_spatial: number of spatial discretisation points
     :param n_temporal: number of temporal discretisation points
-    :return: The exact solution as a numpy array
+    :return:
+        x: (1 x n_spatial) array with the x-coordinates
+        t: (1 x nn_temporal) array with the t-coordinates
+        u: (n_spatial x n_temporal) array with the exact solution
     """
     try:
         data = scipy.io.loadmat(
-            f'burgers_exact/solutions/burgers_exact_N_t={n_temporal}_N_x={n_spatial}.mat')
-        return np.real(data['mysol'])
+            f'burgers_exact/solutions/burgers_exact_K={n_temporal-1}_H={n_spatial-1}.mat')
+        return np.real(data['x']), np.real(data['t']), np.real(data['u'])
     except FileNotFoundError as e:
         cprint(e, "red")
         cprint("Please make sure that the exact solution for the desired granularity exists. Check out "

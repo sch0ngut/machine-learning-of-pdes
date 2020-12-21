@@ -37,14 +37,10 @@ class PINN:
         # Network evaluation
         self.n_spatial = n_spatial
         self.n_temporal = n_temporal
-        self.u_exact = data_loader(self.n_spatial, self.n_temporal).T
-        self.t = np.linspace(0, 1, self.n_temporal)
-        self.x = np.linspace(-1, 1, self.n_spatial)
+        self.x, self.t, self.u_exact = data_loader(self.n_spatial, self.n_temporal)
         x_mesh, t_mesh = np.meshgrid(self.x, self.t)
         self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
         self.eval_tar = self.u_exact.flatten()[:, None]
-        print(self.eval_feat.shape)
-        print(self.eval_tar.shape)
 
         # Training data initialisation
         self.train_data = pd.DataFrame()
@@ -153,7 +149,7 @@ class PINN:
     def get_predictions_shaped(self) -> np.ndarray:
         """
         Generates the network's solution on the evaluation features
-        :return: The predictions as an array
+        :return: The predictions as an (n_temporal x n_spatial) - array
         """
         preds = self.network(self.eval_feat)
         return np.reshape(preds, (self.n_temporal, self.n_spatial))

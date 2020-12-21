@@ -67,7 +67,7 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
 
     :param u: An array containing the solution to plot. Should have the dimensions (n_spatial x n_temporal)
     :param t_vec: A vector containing the desired time points to plot
-    :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired.
+    :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired
     """
     # Define grid
     n_spatial = u.shape[0]
