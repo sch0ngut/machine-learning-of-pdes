@@ -1,4 +1,6 @@
 burgers_exact/solutions/
+burgers_exact/solutions_old/
+burgers_exact/main.m~
 
 machine_learning_of_pdes.egg-info/
 venv/
