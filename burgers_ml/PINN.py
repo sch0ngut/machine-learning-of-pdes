@@ -1,24 +1,22 @@
 from typing import Union, List
-
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-import scipy.io
-
 from util.data_loader import data_loader
 
 
 class PINN:
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
-                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), H: int = 320, K: int = 100) -> None:
+                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), n_spatial: int = 321,
+                 n_temporal: int = 101) -> None:
         """
         :param act_fun: Activation function at each node of the neural network
         :param n_nodes: Number of nodes of each hidden layer
         :param n_layers: Number of hidden layers
         :param n_coll: Number of collocation points used to evaluate the regularisation term during model training
         :param loss_obj: The loss function
-        :param H: H+1: Number of spatial discretisation points used for model evaluation
-        :param K: K+1: Number of temporal discretisation points used for model evaluation
+        :param n_spatial: Number of spatial discretisation points used for model evaluation
+        :param n_temporal: Number of temporal discretisation points used for model evaluation
         """
 
         # Network parameters
@@ -37,12 +35,16 @@ class PINN:
         self.network.add(tf.keras.layers.Dense(1))
 
         # Network evaluation
-        u_exact = data_loader(H, K).T
-        t = np.linspace(0, 1, K + 1)
-        x = np.linspace(-1, 1, H + 1)
-        X, T = np.meshgrid(x, t)
-        self.eval_feat = np.hstack((X.flatten()[:, None], T.flatten()[:, None]))
-        self.eval_tar = u_exact.flatten()[:, None]
+        self.n_spatial = n_spatial
+        self.n_temporal = n_temporal
+        self.u_exact = data_loader(self.n_spatial, self.n_temporal).T
+        self.t = np.linspace(0, 1, self.n_temporal)
+        self.x = np.linspace(-1, 1, self.n_spatial)
+        x_mesh, t_mesh = np.meshgrid(self.x, self.t)
+        self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
+        self.eval_tar = self.u_exact.flatten()[:, None]
+        print(self.eval_feat.shape)
+        print(self.eval_tar.shape)
 
         # Training data initialisation
         self.train_data = pd.DataFrame()
@@ -84,7 +86,7 @@ class PINN:
             iter(self.batch_and_split_data(self.boundary_train_data)))
 
     def perform_training(self, max_n_epochs=500, min_train_loss=0.01, batch_size='full',
-                         optimizer=tf.keras.optimizers.Adam(), track_losses=True):
+                         optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> pd.DataFrame:
         """
         Trains the network until a maximum given number of epochs or minimum loss on the training data is achieved.
 
@@ -123,11 +125,11 @@ class PINN:
                 if not track_losses:
                     loss_df.loc[epoch] = self.get_losses()
                 print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
-                      format(0,
-                             loss_df.loc[0, 'loss_tot'],
-                             loss_df.loc[0, 'loss_train'],
-                             loss_df.loc[0, 'loss_coll'],
-                             loss_df.loc[0, 'error']))
+                      format(epoch,
+                             loss_df.loc[epoch, 'loss_tot'],
+                             loss_df.loc[epoch, 'loss_train'],
+                             loss_df.loc[epoch, 'loss_coll'],
+                             loss_df.loc[epoch, 'error']))
 
             epoch = epoch + 1
 
@@ -147,6 +149,14 @@ class PINN:
         error = self.loss_obj(self.network(self.eval_feat), self.eval_tar).numpy()
 
         return [loss_initial, loss_boundary, loss_train, loss_coll, loss_train + loss_coll, error]
+
+    def get_predictions_shaped(self) -> np.ndarray:
+        """
+        Generates the network's solution on the evaluation features
+        :return: The predictions as an array
+        """
+        preds = self.network(self.eval_feat)
+        return np.reshape(preds, (self.n_temporal, self.n_spatial))
 
     def get_coll_loss(self) -> tf.Tensor:
         """
