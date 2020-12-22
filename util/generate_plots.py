@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
 
-def generate_contour_plot(u: np.ndarray, savefig_path="") -> None:
+def generate_contour_plot(u: np.ndarray, savefig_path="", **kwargs) -> None:
     """
     Generates a contour plot
 
@@ -25,6 +25,12 @@ def generate_contour_plot(u: np.ndarray, savefig_path="") -> None:
     plt.ylabel(r'$x$')
     plt.xlabel(r'$t$')
     plt.title(r'$u(x,t)$')
+
+    # Add the training data if desired
+    if 'train_feat' in kwargs:
+        train_feat = kwargs.get('train_feat')
+        plt.plot(train_feat[:, 1], train_feat[:, 0], 'kx', label='training data', markersize=4, clip_on=False)
+
     plt.show()
 
     # Save
@@ -61,7 +67,7 @@ def generate_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 
 
 
 def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
-                                        savefig_path: str = "") -> None:
+                                        savefig_path: str = "", **kwargs) -> None:
     """
     Generates a contour and time snapshots plot in one figure
 
@@ -88,6 +94,10 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     ax0.set_ylabel(r'$x$')
     ax0.set_xlabel(r'$t$')
     ax0.set_title(r'$u(x,t)$')
+    # Add the training data if desired
+    if 'train_feat' in kwargs:
+        train_feat = kwargs.get('train_feat')
+        plt.plot(train_feat[:, 1], train_feat[:, 0], 'kx', label='training data', markersize=4, clip_on=False)
 
     # Time snapshots plot
     ax1 = plt.subplot(gs[1])

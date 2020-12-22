@@ -1,8 +1,9 @@
-from typing import Union, List
+from typing import Union, List, Tuple
 import tensorflow as tf
 import numpy as np
 import pandas as pd
 from util.data_loader import data_loader
+from sklearn.metrics import mean_squared_error
 
 
 class PINN:
@@ -14,7 +15,7 @@ class PINN:
         :param n_nodes: Number of nodes of each hidden layer
         :param n_layers: Number of hidden layers
         :param n_coll: Number of collocation points used to evaluate the regularisation term during model training
-        :param loss_obj: The loss function
+        :param loss_obj: The loss function to use during model training
         :param n_spatial: Number of spatial discretisation points used for model evaluation
         :param n_temporal: Number of temporal discretisation points used for model evaluation
         """
@@ -40,7 +41,7 @@ class PINN:
         self.x, self.t, self.u_exact = data_loader(self.n_spatial, self.n_temporal)
         x_mesh, t_mesh = np.meshgrid(self.x, self.t)
         self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
-        self.eval_tar = self.u_exact.flatten()[:, None]
+        self.eval_tar = self.u_exact.flatten(order='F')[:, None]
 
         # Training data initialisation
         self.train_data = pd.DataFrame()
@@ -81,13 +82,15 @@ class PINN:
         self.boundary_train_feat, self.boundary_train_tar = next(
             iter(self.batch_and_split_data(self.boundary_train_data)))
 
-    def perform_training(self, max_n_epochs=500, min_train_loss=0.01, batch_size='full',
-                         optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> pd.DataFrame:
+    def perform_training(self, max_n_epochs: int = 99999, min_train_loss: float = 0, min_mse: float = 0,
+                         batch_size='full', optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> \
+            Tuple[pd.DataFrame, float]:
         """
         Trains the network until a maximum given number of epochs or minimum loss on the training data is achieved.
 
         :param max_n_epochs: Stopping criterion: The maximum number of epochs
         :param min_train_loss: Stopping criterion: The minimum loss on the training data
+        :param min_mse: Stopping criterion: The minimum mean squared error
         :param batch_size: Yhe batch size used during model training
         :param optimizer: The optimizer used for model training
         :param track_losses: Whether to track the losses in each epoch. Setting to False speeds up the computation
@@ -105,8 +108,10 @@ class PINN:
                      loss_df.loc[0, 'loss_coll'],
                      loss_df.loc[0, 'error']))
 
+        mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
         epoch = 1
-        while epoch <= max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss:
+        while epoch <= max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss\
+                and mse >= min_mse:
 
             # Perform training
             train_data_batched = self.batch_and_split_data(self.train_data, batch_size)
@@ -127,9 +132,10 @@ class PINN:
                              loss_df.loc[epoch, 'loss_coll'],
                              loss_df.loc[epoch, 'error']))
 
+            mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
             epoch = epoch + 1
 
-        return loss_df
+        return loss_df, mse
 
     def get_losses(self) -> List:
         """
