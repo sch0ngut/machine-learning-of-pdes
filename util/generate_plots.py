@@ -59,11 +59,12 @@ def generate_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 
     plt.legend()
     plt.ylabel(r'$u(x,t)$')
     plt.xlabel(r'$x$')
-    plt.show()
 
     # Save
     if savefig_path:
         plt.savefig(savefig_path, dpi=1000)
+
+    plt.show()
 
 
 def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
@@ -109,11 +110,11 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     ax1.set_ylabel(r'$u(x,t)$')
     ax1.set_xlabel(r'$x$')
 
-    plt.show()
-
     # Save
     if savefig_path:
         plt.savefig(savefig_path, dpi=1000)
+
+    plt.show()
 
 
 def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None) -> None:
@@ -130,5 +131,5 @@ def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None) -> None:
 
     if savefig_path:
         plt.savefig(savefig_path)
-    else:
-        plt.show()
+
+    plt.show()
