@@ -54,21 +54,30 @@ class PINN:
         self.boundary_train_feat = tf.zeros([0, 2])
         self.boundary_train_tar = tf.zeros([0, 1])
 
-    def generate_training_data(self, n_initial: int, n_boundary: int) -> None:
+    def generate_training_data(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> None:
         """
         Generates the training data on the initial and boundary intervals with a uniform distance
 
         :param n_initial: Number of training points at t=0
-        :param n_boundary: Number of training points at x in {-1,1}
+        :param n_boundary: Number of training points on each of the two boundaries (x=-1, x=1)
+        :param equidistant: Whether the training points are equidistant or randomly sampled
         """
         # Generate data
-        x = np.linspace(-1, 1, n_initial)
-        u0 = np.zeros(n_initial)
-        u0[1:-1] = -np.sin(np.pi * x[1:-1])
-        t = np.linspace(1 / (n_boundary - 1), 1, n_boundary - 1)
-        data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
-        data_boundary1 = pd.DataFrame({"x": np.ones(n_boundary - 1), "t": t, "u": np.zeros(n_boundary - 1)})
-        data_boundary2 = pd.DataFrame({"x": -np.ones(n_boundary - 1), "t": t, "u": np.zeros(n_boundary - 1)})
+        if equidistant:
+            x = np.linspace(-1, 1, n_initial)
+            u0 = np.zeros(n_initial)
+            u0[1:-1] = -np.sin(np.pi * x[1:-1])
+            t = np.linspace(1 / n_boundary, 1, n_boundary)
+            data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
+            data_boundary1 = pd.DataFrame({"x": np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
+            data_boundary2 = pd.DataFrame({"x": -np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
+        else:
+            x = -1 + 2 * np.random.rand(n_initial)
+            data_t0 = pd.DataFrame({'x': x, 't': np.zeros(n_initial), 'u': -np.sin(np.pi * x)})
+            t1 = np.random.rand(n_boundary)
+            data_boundary1 = pd.DataFrame({'x': np.ones(n_boundary), 't': t1, 'u': np.zeros(n_boundary)})
+            t2 = np.random.rand(n_boundary)
+            data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': np.zeros(n_boundary)})
 
         # Set training data
         self.train_data = pd.concat([data_t0, data_boundary1, data_boundary2])
