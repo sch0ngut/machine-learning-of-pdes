@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from util.data_loader import data_loader
 
 
@@ -44,8 +44,35 @@ class NumericalSolver(ABC):
         """
         Computes the error in the L2 norm
         """
-        return np.sqrt(self.k * self.h) * np.linalg.norm(self.u_exact[1:self.n_spatial-2, 1:-1] -
-                                                         self.u[1:self.n_spatial-2, 1:-1])
+        # Option 1: Only on inner points (neglecting initial and boundary conditions)
+        # return np.sqrt(1/((self.n_temporal-1)*(self.n_spatial-2))) * np.linalg.norm(
+        #     self.u_exact[1:self.n_spatial-1, 1:] - self.u[1:self.n_spatial-1, 1:])
+        # Option 2: On all points
+        return np.sqrt(1 / (self.n_temporal * self.n_spatial)) * np.linalg.norm(self.u_exact - self.u)
+
+    def get_mean_squared_error(self):
+        """
+        Computes the mean squared error
+        """
+        # Option 1: Only on inner points (neglecting initial and boundary conditions)
+        # return mean_squared_error(self.u_exact[1:self.n_spatial-1, 1:], self.u[1:self.n_spatial-1, 1:])
+        # Option 2: On all points
+        try:
+            return mean_squared_error(self.u_exact, self.u)
+        except ValueError:
+            return np.inf
+
+    def get_mean_absolute_error(self):
+        """
+        Computes the mean absolute error
+        """
+        # Option 1: Only on inner points (neglecting initial and boundary conditions)
+        # return mean_absolute_error(self.u_exact[1:self.n_spatial-1, 1:], self.u[1:self.n_spatial-1, 1:])
+        # Option 2: On all points
+        try:
+            return mean_absolute_error(self.u_exact, self.u)
+        except ValueError:
+            return np.inf
 
     def get_l_max_error(self):
         """
