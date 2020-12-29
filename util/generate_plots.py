@@ -122,8 +122,9 @@ def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None, **kwargs
     Generates a plot of the losses and against the epochs
 
     :param loss_df: The data frame containing the different losses in the columns and the epochs as indices
-    :param color_dict: A dictionary assigning the column names of loss_df a color for plotting
     :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired.
+    :param kwargs:
+        - color_dict: A dictionary assigning the column names of loss_df a color for plotting
     """
     if 'color_dict' in kwargs:
         color_dict = kwargs.get('color_dict')
