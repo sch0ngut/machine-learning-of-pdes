@@ -13,7 +13,7 @@ print(loss_df)
 print(final_mse)
 u_preds = pinn.get_predictions_shaped()
 print(u_preds.shape)
-generate_contour_and_snapshots_plot(u_preds.T, train_feat=pinn.train_feat)
+generate_contour_and_snapshots_plot(u_preds, train_feat=pinn.train_feat)
 
 plot_df = loss_df[['loss_IC', 'loss_BC', 'loss_coll', 'error']]
 plot_df.columns = ['loss on initial data', 'loss on boundary data', 'loss on collocation points', 'error']

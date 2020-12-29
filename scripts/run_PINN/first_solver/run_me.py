@@ -24,7 +24,7 @@ color_dict1 = {
     'loss on collocation points': 'orange',
     'error': 'red'
 }
-generate_loss_plot(plot_df1, color_dict1, savefig_path='scripts/run_PINN/first_solver/loss_plot1.jpg')
+generate_loss_plot(plot_df1, color_dict=color_dict1, savefig_path='scripts/run_PINN/first_solver/loss_plot1.jpg')
 
 # Plot loss: training loss split in loss on initial and boundary conditions
 plot_df2 = loss_df[['loss_IC', 'loss_BC', 'loss_coll', 'error']]
@@ -35,6 +35,6 @@ color_dict2 = {
     'loss on collocation points': 'orange',
     'error': 'red'
 }
-generate_loss_plot(plot_df2, color_dict2, savefig_path='scripts/run_PINN/first_solver/loss_plot2.jpg')
+generate_loss_plot(plot_df2, color_dict=color_dict2, savefig_path='scripts/run_PINN/first_solver/loss_plot2.jpg')
 
 pinn.network.save('scripts/run_PINN/first_solver/model.h5')

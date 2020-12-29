@@ -164,10 +164,10 @@ class PINN:
     def get_predictions_shaped(self) -> np.ndarray:
         """
         Generates the network's solution on the evaluation features
-        :return: The predictions as an (n_temporal x n_spatial) - array
+        :return: The predictions as an (n_spatial x n_temporal) - array
         """
         preds = self.network(self.eval_feat)
-        return np.reshape(preds, (self.n_temporal, self.n_spatial))
+        return np.reshape(preds, (self.n_temporal, self.n_spatial)).T
 
     def get_coll_loss(self) -> tf.Tensor:
         """

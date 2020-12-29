@@ -117,6 +117,88 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     plt.show()
 
 
+def generate_two_contour_and_snapshots_plots(u1: np.ndarray, u2: np.ndarray,
+                                             t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
+                                             savefig_path: str = "", **kwargs) -> None:
+    """
+    Generates two contour and time snapshots plot in one figure
+
+    :param u1: An array containing the first solution to plot. Should have the dimensions (n_spatial x n_temporal)
+    :param u2: An array containing the second solution to plot. Should have the dimensions (n_spatial x n_temporal)
+    :param t_vec: A vector containing the desired time points to plot
+    :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired
+    """
+    # Create figure
+    plt.figure(figsize=(14, 10))
+    gs = gridspec.GridSpec(2, 2, width_ratios=[2, 1])
+
+    # Define grid 1
+    n_spatial = u1.shape[0]
+    n_temporal = u1.shape[1]
+    x = np.linspace(-1, 1, n_spatial)
+    t = np.linspace(0, 1, n_temporal)
+    x_mesh, t_mesh = np.meshgrid(x, t)
+
+    # Contour Plot 1
+    ax0 = plt.subplot(gs[0])
+    v = np.linspace(-1, 1, 5, endpoint=True)
+    p = ax0.contourf(t_mesh, x_mesh, u1.T, v, levels=100, cmap=plt.cm.jet)
+    plt.colorbar(p, ax=ax0, ticks=v)
+    ax0.set_ylabel(r'$x$')
+    ax0.set_xlabel(r'$t$')
+    ax0.set_title(r'$u(x,t)$')
+    # Add the training data if desired
+    if 'train_feat' in kwargs:
+        train_feat = kwargs.get('train_feat')
+        plt.plot(train_feat[:, 1], train_feat[:, 0], 'kx', label='training data', markersize=4, clip_on=False)
+
+    # Time snapshots plot 1
+    ax1 = plt.subplot(gs[1])
+    for t_val in t_vec:
+        j = int(t_val * (n_temporal-1))
+        # plt.plot(x, u_exact[:, j], label=r'$t={{{}}}$'.format(t_val))
+        ax1.plot(x, u1[:, j], label=r'$t={{{}}}$'.format(t_val))
+    ax1.legend()
+    ax1.set_ylabel(r'$u(x,t)$')
+    ax1.set_xlabel(r'$x$')
+
+    # Define grid 2
+    n_spatial = u2.shape[0]
+    n_temporal = u2.shape[1]
+    x = np.linspace(-1, 1, n_spatial)
+    t = np.linspace(0, 1, n_temporal)
+    x_mesh, t_mesh = np.meshgrid(x, t)
+
+    # Contour Plot 2
+    ax0 = plt.subplot(gs[2])
+    v = np.linspace(-1, 1, 5, endpoint=True)
+    p = ax0.contourf(t_mesh, x_mesh, u2.T, v, levels=100, cmap=plt.cm.jet)
+    plt.colorbar(p, ax=ax0, ticks=v)
+    ax0.set_ylabel(r'$x$')
+    ax0.set_xlabel(r'$t$')
+    ax0.set_title(r'$u(x,t)$')
+    # Add the training data if desired
+    if 'train_feat' in kwargs:
+        train_feat = kwargs.get('train_feat')
+        plt.plot(train_feat[:, 1], train_feat[:, 0], 'kx', label='training data', markersize=4, clip_on=False)
+
+    # Time snapshots plot 2
+    ax1 = plt.subplot(gs[3])
+    for t_val in t_vec:
+        j = int(t_val * (n_temporal - 1))
+        # plt.plot(x, u_exact[:, j], label=r'$t={{{}}}$'.format(t_val))
+        ax1.plot(x, u2[:, j], label=r'$t={{{}}}$'.format(t_val))
+    ax1.legend()
+    ax1.set_ylabel(r'$u(x,t)$')
+    ax1.set_xlabel(r'$x$')
+
+    # Save
+    if savefig_path:
+        plt.savefig(savefig_path, dpi=1000)
+
+    plt.show()
+
+
 def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None, **kwargs) -> None:
     """
     Generates a plot of the losses and against the epochs
