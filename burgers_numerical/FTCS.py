@@ -31,9 +31,9 @@ class FTCS(NumericalSolver):
         """
 
         for n in range(self.n_temporal - 1):
-            u_n = self.u[:, n]
+            u_n = self.u_numerical[:, n]
             u_n_inner = u_n[1:self.n_spatial-1]
-            self.u[1:self.n_spatial-1, n + 1] = u_n_inner + self.A.dot(u_n) - u_n_inner * self.B.dot(u_n)
+            self.u_numerical[1:self.n_spatial-1, n + 1] = u_n_inner + self.A.dot(u_n) - u_n_inner * self.B.dot(u_n)
 
         # Conservation form:
         # for n in range(1, self.K + 1):

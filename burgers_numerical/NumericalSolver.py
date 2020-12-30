@@ -27,8 +27,8 @@ class NumericalSolver(ABC):
         self.u0 = kwargs.get('u0', -np.sin(np.pi * self.x))
 
         # Solution matrix
-        self.u = np.zeros(shape=(self.n_spatial, self.n_temporal))
-        self.u[:, 0] = self.u0
+        self.u_numerical = np.zeros(shape=(self.n_spatial, self.n_temporal))
+        self.u_numerical[:, 0] = self.u0
 
         # Load exact
         _, _, self.u_exact = data_loader(self.n_spatial, self.n_temporal)
@@ -48,7 +48,7 @@ class NumericalSolver(ABC):
         # return np.sqrt(1/((self.n_temporal-1)*(self.n_spatial-2))) * np.linalg.norm(
         #     self.u_exact[1:self.n_spatial-1, 1:] - self.u[1:self.n_spatial-1, 1:])
         # Option 2: On all points
-        return np.sqrt(1 / (self.n_temporal * self.n_spatial)) * np.linalg.norm(self.u_exact - self.u)
+        return np.sqrt(1 / (self.n_temporal * self.n_spatial)) * np.linalg.norm(self.u_exact - self.u_numerical)
 
     def get_mean_squared_error(self):
         """
@@ -58,7 +58,7 @@ class NumericalSolver(ABC):
         # return mean_squared_error(self.u_exact[1:self.n_spatial-1, 1:], self.u[1:self.n_spatial-1, 1:])
         # Option 2: On all points
         try:
-            return mean_squared_error(self.u_exact, self.u)
+            return mean_squared_error(self.u_exact, self.u_numerical)
         except ValueError:
             return np.inf
 
@@ -70,7 +70,7 @@ class NumericalSolver(ABC):
         # return mean_absolute_error(self.u_exact[1:self.n_spatial-1, 1:], self.u[1:self.n_spatial-1, 1:])
         # Option 2: On all points
         try:
-            return mean_absolute_error(self.u_exact, self.u)
+            return mean_absolute_error(self.u_exact, self.u_numerical)
         except ValueError:
             return np.inf
 
@@ -78,4 +78,4 @@ class NumericalSolver(ABC):
         """
         Computes the maximum error on the entire spatio-temporal domain
         """
-        return np.amax(abs(self.u_exact - self.u))
+        return np.amax(abs(self.u_exact - self.u_numerical))

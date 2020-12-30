@@ -41,4 +41,5 @@ class HopfCole(NumericalSolver):
 
         # Re-transform to Burgers
         for j in range(1, self.n_spatial-1):
-            self.u[j, :] = -self.nu / self.h * (self.theta[j + 1, :] - self.theta[j - 1, :]) / self.theta[j, :]
+            self.u_numerical[j, :] = -self.nu / self.h * (self.theta[j + 1, :] -
+                                                          self.theta[j - 1, :]) / self.theta[j, :]
