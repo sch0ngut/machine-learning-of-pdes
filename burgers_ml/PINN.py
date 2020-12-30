@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple
+from typing import Union, List
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -9,7 +9,7 @@ from sklearn.metrics import mean_squared_error
 class PINN:
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
                  loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), n_spatial: int = 321,
-                 n_temporal: int = 101) -> None:
+                 n_temporal: int = 101, tf_seed: int = 1, np_seed: int = 1) -> None:
         """
         :param act_fun: Activation function at each node of the neural network
         :param n_nodes: Number of nodes of each hidden layer
@@ -18,7 +18,12 @@ class PINN:
         :param loss_obj: The loss function to use during model training
         :param n_spatial: Number of spatial discretisation points used for model evaluation
         :param n_temporal: Number of temporal discretisation points used for model evaluation
+        :param tf_seed: Tensorflow seed to generate reproducable results
+        :param np_seed: Numpy seed to generate reproducable results
         """
+
+        tf.random.set_seed(tf_seed)
+        np.random.seed(np_seed)
 
         # Network parameters
         self.act_fun = act_fun
@@ -42,6 +47,11 @@ class PINN:
         x_mesh, t_mesh = np.meshgrid(self.x, self.t)
         self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
         self.eval_tar = self.u_exact.flatten(order='F')[:, None]
+        self.u_pred = np.zeros(shape=(self.n_spatial, self.n_temporal))
+
+        # Network training evaluation
+        self.loss_df = pd.DataFrame()
+        self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
 
         # Training data initialisation
         self.train_data = pd.DataFrame()
@@ -92,8 +102,7 @@ class PINN:
             iter(self.batch_and_split_data(self.boundary_train_data)))
 
     def perform_training(self, max_n_epochs: int = 99999, min_train_loss: float = 0, min_mse: float = 0,
-                         batch_size='full', optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> \
-            Tuple[pd.DataFrame, float]:
+                         batch_size='full', optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> None:
         """
         Trains the network until a maximum given number of epochs or minimum loss on the training data is achieved.
 
@@ -107,20 +116,19 @@ class PINN:
         epochs
         """
         # Initialise loss data frame and print losses before model training
-        loss_df = pd.DataFrame(
+        self.loss_df = pd.DataFrame(
             columns=['epoch', 'loss_IC', 'loss_BC', 'loss_train', 'loss_coll', 'loss_tot', 'error']).set_index('epoch')
-        loss_df.loc[0] = self.get_losses()
+        self.loss_df.loc[0] = self.get_losses()
         print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
               format(0,
-                     loss_df.loc[0, 'loss_tot'],
-                     loss_df.loc[0, 'loss_train'],
-                     loss_df.loc[0, 'loss_coll'],
-                     loss_df.loc[0, 'error']))
+                     self.loss_df.loc[0, 'loss_tot'],
+                     self.loss_df.loc[0, 'loss_train'],
+                     self.loss_df.loc[0, 'loss_coll'],
+                     self.loss_df.loc[0, 'error']))
 
-        mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
         epoch = 1
         while epoch <= max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss\
-                and mse >= min_mse:
+                and self.mse >= min_mse:
 
             # Perform training
             train_data_batched = self.batch_and_split_data(self.train_data, batch_size)
@@ -130,21 +138,23 @@ class PINN:
 
             # Track training process
             if track_losses:
-                loss_df.loc[epoch] = self.get_losses()
+                self.loss_df.loc[epoch] = self.get_losses()
             if epoch % 100 == 0:
                 if not track_losses:
-                    loss_df.loc[epoch] = self.get_losses()
+                    self.loss_df.loc[epoch] = self.get_losses()
                 print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
                       format(epoch,
-                             loss_df.loc[epoch, 'loss_tot'],
-                             loss_df.loc[epoch, 'loss_train'],
-                             loss_df.loc[epoch, 'loss_coll'],
-                             loss_df.loc[epoch, 'error']))
+                             self.loss_df.loc[epoch, 'loss_tot'],
+                             self.loss_df.loc[epoch, 'loss_train'],
+                             self.loss_df.loc[epoch, 'loss_coll'],
+                             self.loss_df.loc[epoch, 'error']))
 
-            mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
-            epoch = epoch + 1
+            self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
+            epoch += 1
 
-        return loss_df, mse
+        self.u_pred = self.get_predictions_as_matrix()
+
+        # return loss_df, mse
 
     def get_losses(self) -> List:
         """
@@ -161,7 +171,7 @@ class PINN:
 
         return [loss_initial, loss_boundary, loss_train, loss_coll, loss_train + loss_coll, error]
 
-    def get_predictions_shaped(self) -> np.ndarray:
+    def get_predictions_as_matrix(self) -> np.ndarray:
         """
         Generates the network's solution on the evaluation features
         :return: The predictions as an (n_spatial x n_temporal) - array
