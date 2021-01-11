@@ -3,6 +3,7 @@ from burgers_numerical.Upwind import Upwind
 from util.generate_plots import *
 import numpy as np
 
+# Part 1: Build and train PINN
 pinn = PINN()
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(max_n_epochs=3, min_mse=0.05, track_losses=True, batch_size='full')

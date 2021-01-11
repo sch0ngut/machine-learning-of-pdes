@@ -49,10 +49,6 @@ class PINN:
         self.eval_tar = self.u_exact.flatten(order='F')[:, None]
         self.u_pred = np.zeros(shape=(self.n_spatial, self.n_temporal))
 
-        # Network training evaluation
-        self.loss_df = pd.DataFrame()
-        self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
-
         # Training data initialisation
         self.train_data = pd.DataFrame()
         self.initial_train_data = pd.DataFrame()
@@ -63,6 +59,19 @@ class PINN:
         self.initial_train_tar = tf.zeros([0, 1])
         self.boundary_train_feat = tf.zeros([0, 2])
         self.boundary_train_tar = tf.zeros([0, 1])
+
+        # Network training evaluation
+        self.epoch = 0
+        self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
+        self.loss_df = pd.DataFrame(
+            columns=['epoch', 'loss_IC', 'loss_BC', 'loss_train', 'loss_coll', 'loss_tot', 'error']).set_index('epoch')
+        self.loss_df.loc[self.epoch] = self.get_losses()
+        print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
+              format(0,
+                     self.loss_df.loc[self.epoch, 'loss_tot'],
+                     self.loss_df.loc[self.epoch, 'loss_train'],
+                     self.loss_df.loc[self.epoch, 'loss_coll'],
+                     self.loss_df.loc[self.epoch, 'error']))
 
     def generate_training_data(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> None:
         """
@@ -115,20 +124,11 @@ class PINN:
         :return: A data frame with the loss on training and collocation points together with the error at the given
         epochs
         """
-        # Initialise loss data frame and print losses before model training
-        self.loss_df = pd.DataFrame(
-            columns=['epoch', 'loss_IC', 'loss_BC', 'loss_train', 'loss_coll', 'loss_tot', 'error']).set_index('epoch')
-        self.loss_df.loc[0] = self.get_losses()
-        print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
-              format(0,
-                     self.loss_df.loc[0, 'loss_tot'],
-                     self.loss_df.loc[0, 'loss_train'],
-                     self.loss_df.loc[0, 'loss_coll'],
-                     self.loss_df.loc[0, 'error']))
 
-        epoch = 1
-        while epoch <= max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss\
+        while self.epoch < max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss\
                 and self.mse >= min_mse:
+
+            self.epoch += 1
 
             # Perform training
             train_data_batched = self.batch_and_split_data(self.train_data, batch_size)
@@ -138,23 +138,20 @@ class PINN:
 
             # Track training process
             if track_losses:
-                self.loss_df.loc[epoch] = self.get_losses()
-            if epoch % 100 == 0:
+                self.loss_df.loc[self.epoch] = self.get_losses()
+            if self.epoch % 100 == 0:
                 if not track_losses:
-                    self.loss_df.loc[epoch] = self.get_losses()
+                    self.loss_df.loc[self.epoch] = self.get_losses()
                 print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
-                      format(epoch,
-                             self.loss_df.loc[epoch, 'loss_tot'],
-                             self.loss_df.loc[epoch, 'loss_train'],
-                             self.loss_df.loc[epoch, 'loss_coll'],
-                             self.loss_df.loc[epoch, 'error']))
+                      format(self.epoch,
+                             self.loss_df.loc[self.epoch, 'loss_tot'],
+                             self.loss_df.loc[self.epoch, 'loss_train'],
+                             self.loss_df.loc[self.epoch, 'loss_coll'],
+                             self.loss_df.loc[self.epoch, 'error']))
 
             self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
-            epoch += 1
 
         self.u_pred = self.get_predictions_as_matrix()
-
-        # return loss_df, mse
 
     def get_losses(self) -> List:
         """
