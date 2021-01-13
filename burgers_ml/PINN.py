@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error
 
 class PINN:
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
-                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), n_spatial: int = 321,
+                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), dropout: bool = False, n_spatial: int = 321,
                  n_temporal: int = 101, tf_seed: int = 1, np_seed: int = 1) -> None:
         """
         :param act_fun: Activation function at each node of the neural network
@@ -16,6 +16,7 @@ class PINN:
         :param n_layers: Number of hidden layers
         :param n_coll: Number of collocation points used to evaluate the regularisation term during model training
         :param loss_obj: The loss function to use during model training
+        :param dropout: Whether to use dropout
         :param n_spatial: Number of spatial discretisation points used for model evaluation
         :param n_temporal: Number of temporal discretisation points used for model evaluation
         :param tf_seed: Tensorflow seed to generate reproducable results
@@ -32,12 +33,19 @@ class PINN:
         self.n_coll = n_coll
         self.coll_points = tf.random.uniform(shape=[n_coll, 2], minval=[-1, 0], maxval=[1, 1])
         self.loss_obj = loss_obj
+        self.dropout = dropout
 
         # Network initialisation
         self.network = tf.keras.Sequential(
-            [tf.keras.layers.Dense(self.n_nodes, activation=self.act_fun, input_shape=(2,))])
+            [tf.keras.layers.Dense(units=self.n_nodes, activation=self.act_fun, input_shape=(2,))])
+        # ToDo: check if should be kept
+        if dropout:
+            self.network.add(tf.keras.layers.Dropout(rate=1))
         for i in range(self.n_layers):
             self.network.add(tf.keras.layers.Dense(self.n_nodes, activation=self.act_fun))
+            # ToDo: check if should be kept
+            if dropout:
+                self.network.add(tf.keras.layers.Dropout(rate=1))
         self.network.add(tf.keras.layers.Dense(1))
 
         # Network evaluation
