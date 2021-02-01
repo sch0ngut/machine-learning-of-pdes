@@ -25,7 +25,7 @@ with np.printoptions(formatter={'float': lambda x: format(x, '6.2e')}):
     print(l_max_errors)
 
 # Calculate convergence rates
-with np.printoptions(precision=4, suppress=True):
+with np.printoptions(precision=2, suppress=True):
     print(np.log(l_2_errors[0:(m-1)]/l_2_errors[1:m])/np.log(2))
     print(np.log(l_max_errors[0:(m-1)]/l_max_errors[1:m])/np.log(2))
 
