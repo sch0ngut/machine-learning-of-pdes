@@ -33,7 +33,7 @@ upwind.time_integrate()
 print(f"Upwind L2 error: {upwind.get_l2_error()}")
 print(f"Upwind L2 error squared: {upwind.get_l2_error()**2}")
 print(f"Upwind MSE: {upwind.get_mean_squared_error()}")
-# generate_contour_and_snapshots_plot(u=upwind.u, savefig_path='scripts/run_Upwind_with_PINN/Upwind_solution.jpg')
+# generate_contour_and_snapshots_plot(u=upwind.u_numerical, savefig_path='scripts/run_Upwind_with_PINN/Upwind_solution.jpg')
 
 # ToDo: Change file name
 # generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical)

@@ -28,3 +28,5 @@ __pycache__/
 .DS_Store
 .idea
 /scripts/run_Upwind_with_PINN/preliminary_results/
+/scripts/run_PINN/first_solver_v2/
+/scripts/run_PINN/training_samples_convergence/
