@@ -190,9 +190,9 @@ class PINN:
 
         :return: The loss value as a tensor
         """
-        with tf.GradientTape(persistent=True) as t1:
+        with tf.GradientTape() as t1:
             t1.watch(self.coll_points)
-            with tf.GradientTape(persistent=True) as t2:
+            with tf.GradientTape() as t2:
                 t2.watch(self.coll_points)
                 # predicted solution on coll_points
                 u_coll = self.network(self.coll_points)

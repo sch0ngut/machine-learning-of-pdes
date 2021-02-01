@@ -19,9 +19,9 @@ def generate_contour_plot(u: np.ndarray, savefig_path="", **kwargs) -> None:
     x_mesh, t_mesh = np.meshgrid(x, t)
 
     # Plot
-    v = np.linspace(-1, 1, 5, endpoint=True)
-    plt.contourf(t_mesh, x_mesh, u.T, v, levels=100, cmap=plt.cm.jet)
-    plt.colorbar(ticks=v)
+    cf0 = plt.contourf(t_mesh, x_mesh, u.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
+    cbar0 = plt.colorbar(cf0)
+    cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
     plt.ylabel(r'$x$')
     plt.xlabel(r'$t$')
     plt.title(r'$u(x,t)$')
@@ -89,12 +89,13 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
 
     # Contour Plot
     ax0 = plt.subplot(gs[0])
-    v = np.linspace(-1, 1, 5, endpoint=True)
-    p = ax0.contourf(t_mesh, x_mesh, u.T, v, levels=100, cmap=plt.cm.jet)
-    plt.colorbar(p, ax=ax0, ticks=v)
+    cf0 = ax0.contourf(t_mesh, x_mesh, u.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
+    cbar0 = plt.colorbar(cf0)
+    cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
     ax0.set_ylabel(r'$x$')
     ax0.set_xlabel(r'$t$')
     ax0.set_title(r'$u(x,t)$')
+
     # Add the training data if desired
     if 'train_feat' in kwargs:
         train_feat = kwargs.get('train_feat')
