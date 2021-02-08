@@ -19,6 +19,7 @@ def generate_contour_plot(u: np.ndarray, savefig_path="", **kwargs) -> None:
     x_mesh, t_mesh = np.meshgrid(x, t)
 
     # Plot
+    plt.figure(figsize=(9.33, 4))
     cf0 = plt.contourf(t_mesh, x_mesh, u.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
     cbar0 = plt.colorbar(cf0)
     cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
@@ -31,11 +32,11 @@ def generate_contour_plot(u: np.ndarray, savefig_path="", **kwargs) -> None:
         train_feat = kwargs.get('train_feat')
         plt.plot(train_feat[:, 1], train_feat[:, 0], 'kx', label='training data', markersize=4, clip_on=False)
 
-    plt.show()
-
     # Save
     if savefig_path:
         plt.savefig(savefig_path, dpi=1000)
+
+    plt.show()
 
 
 def generate_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
@@ -142,9 +143,9 @@ def generate_two_contour_and_snapshots_plots(u1: np.ndarray, u2: np.ndarray,
 
     # Contour Plot 1
     ax0 = plt.subplot(gs[0])
-    v = np.linspace(-1, 1, 5, endpoint=True)
-    p = ax0.contourf(t_mesh, x_mesh, u1.T, v, levels=100, cmap=plt.cm.jet)
-    plt.colorbar(p, ax=ax0, ticks=v)
+    cf0 = ax0.contourf(t_mesh, x_mesh, u1.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
+    cbar0 = plt.colorbar(cf0)
+    cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
     ax0.set_ylabel(r'$x$')
     ax0.set_xlabel(r'$t$')
     ax0.set_title(r'$u(x,t)$')
@@ -171,10 +172,10 @@ def generate_two_contour_and_snapshots_plots(u1: np.ndarray, u2: np.ndarray,
     x_mesh, t_mesh = np.meshgrid(x, t)
 
     # Contour Plot 2
-    ax0 = plt.subplot(gs[2])
-    v = np.linspace(-1, 1, 5, endpoint=True)
-    p = ax0.contourf(t_mesh, x_mesh, u2.T, v, levels=100, cmap=plt.cm.jet)
-    plt.colorbar(p, ax=ax0, ticks=v)
+    ax0 = plt.subplot(gs[0])
+    cf0 = ax0.contourf(t_mesh, x_mesh, u2.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
+    cbar0 = plt.colorbar(cf0)
+    cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
     ax0.set_ylabel(r'$x$')
     ax0.set_xlabel(r'$t$')
     ax0.set_title(r'$u(x,t)$')

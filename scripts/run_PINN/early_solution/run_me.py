@@ -9,6 +9,8 @@ pinn.perform_training(max_n_epochs=50, min_mse=0.0005, track_losses=True, batch_
 # Plot solution
 generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat,
                                     savefig_path='scripts/run_PINN/early_solution/contour_and_snapshots_plot.jpg')
+generate_contour_plot(pinn.u_pred, train_feat=pinn.train_feat,
+                      savefig_path='scripts/run_PINN/early_solution/contour_plot.jpg')
 
 # Plot loss: overall training loss
 plot_df1 = pinn.loss_df[['loss_train', 'loss_coll', 'error']]
