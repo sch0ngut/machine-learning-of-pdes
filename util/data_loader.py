@@ -4,7 +4,7 @@ import numpy as np
 import sys
 
 
-def data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
+def burgers_data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
     """
     Tries to load the exact solution of the specified granularity
 
@@ -24,3 +24,9 @@ def data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
         cprint("Please make sure that the exact solution for the desired granularity exists. Check out "
                "burgers_exact/README.md", "red")
         sys.exit(0)
+
+
+def allen_cahn_data_loader() -> np.ndarray:
+    data = scipy.io.loadmat(
+        f'allen_cahn_exact/AC.mat')
+    return np.real(data['x']), np.real(data['tt']), np.real(data['uu'])
