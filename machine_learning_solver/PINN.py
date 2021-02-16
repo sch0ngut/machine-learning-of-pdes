@@ -231,6 +231,9 @@ class BurgersPINN(PINN):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def data_loader(self):
+        return burgers_data_loader(self.n_spatial, self.n_temporal)
+
     def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
         if equidistant:
             x = np.linspace(-1, 1, n_initial)
@@ -247,10 +250,8 @@ class BurgersPINN(PINN):
             data_boundary1 = pd.DataFrame({'x': np.ones(n_boundary), 't': t1, 'u': np.zeros(n_boundary)})
             t2 = np.random.rand(n_boundary)
             data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': np.zeros(n_boundary)})
-        return data_t0, data_boundary1, data_boundary2
 
-    def data_loader(self):
-        return burgers_data_loader(self.n_spatial, self.n_temporal)
+        return data_t0, data_boundary1, data_boundary2
 
     def get_coll_loss(self) -> tf.Tensor:
         """
@@ -279,3 +280,65 @@ class BurgersPINN(PINN):
         del t1, t2
 
         return loss_coll
+
+
+class ACPINN(PINN):
+    def __init__(self, *args, **kwargs):
+        super().__init__(n_spatial=512, n_temporal=201, *args, **kwargs)
+
+    def data_loader(self):
+        return allen_cahn_data_loader()
+
+    def get_coll_loss(self) -> tf.Tensor:
+        """
+        Computes the regularisation term of the loss function using the collocation points and automatic differentiation
+
+        :return: The loss value as a tensor
+        """
+        with tf.GradientTape(persistent=True) as t1:
+            t1.watch(self.coll_points)
+            with tf.GradientTape(persistent=True) as t2:
+                t2.watch(self.coll_points)
+                # predicted solution on coll_points
+                u_coll = self.network(self.coll_points)
+                u_coll = tf.gather(u_coll, 0, axis=1)
+            # 1st order derivative
+            u_coll_grads = t2.gradient(u_coll, self.coll_points)
+            u_coll_x = tf.gather(u_coll_grads, 0, axis=1)
+            u_coll_t = tf.gather(u_coll_grads, 1, axis=1)
+        # 2nd order derivative
+        u_coll_grads_2 = t1.gradient(u_coll_grads, self.coll_points)
+        u_coll_xx = tf.gather(u_coll_grads_2, 0, axis=1)
+
+        # ToDo:
+        #         loss_coll_vec = u_coll_t + tf.multiply(u_coll, u_coll_x) - (0.01 / np.pi) * u_coll_xx
+        loss_coll_vec = u_coll_t - 0.0001 * u_coll_xx + 5 * tf.multiply(u_coll,
+                                                                        tf.multiply(u_coll, u_coll)) - 5 * u_coll
+        #         loss_coll_vec = u_coll_t - u_coll_xx -1 + np.pi ** 2 * tf.math.sin(np.pi * self.coll_points[:,0])
+        #         loss_coll_vec = u_coll_t - u_coll_xx -1 + tf.math.cos(np.pi * self.coll_points[:,0]) * (2 - np.pi**2 * self.coll_points[:,0]**2) - 4 * np.pi * self.coll_points[:,0] * tf.math.sin(np.pi * self.coll_points[:,0])
+        loss_coll = self.loss_obj(loss_coll_vec, tf.zeros((self.n_coll,)))
+
+        del t1, t2
+
+        return loss_coll
+
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
+        if equidistant:
+            x = np.linspace(-1, 1, n_initial)
+            # ToDo
+            #             u0 = np.zeros(n_initial)
+            #             u0[1:-1] = -np.sin(np.pi * x[1:-1])
+            u0 = x ** 2 * np.cos(np.pi * x)
+            t = np.linspace(1 / n_boundary, 1, n_boundary)
+            data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
+            data_boundary1 = pd.DataFrame({"x": np.ones(n_boundary), "t": t, "u": -np.ones(n_boundary)})
+            data_boundary2 = pd.DataFrame({"x": -np.ones(n_boundary), "t": t, "u": -np.ones(n_boundary)})
+        else:
+            x = -1 + 2 * np.random.rand(n_initial)
+            data_t0 = pd.DataFrame({'x': x, 't': np.zeros(n_initial), 'u': x ** 2 * np.cos(np.pi * x)})
+            t1 = np.random.rand(n_boundary)
+            data_boundary1 = pd.DataFrame({'x': np.ones(n_boundary), 't': t1, 'u': -np.ones(n_boundary)})
+            t2 = np.random.rand(n_boundary)
+            data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': -np.ones(n_boundary)})
+
+        return data_t0, data_boundary1, data_boundary2
