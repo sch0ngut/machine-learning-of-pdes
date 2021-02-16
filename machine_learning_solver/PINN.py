@@ -282,7 +282,7 @@ class BurgersPINN(PINN):
         return loss_coll
 
 
-class ACPINN(PINN):
+class AllenCahnPINN(PINN):
     def __init__(self, *args, **kwargs):
         super().__init__(n_spatial=512, n_temporal=201, *args, **kwargs)
 

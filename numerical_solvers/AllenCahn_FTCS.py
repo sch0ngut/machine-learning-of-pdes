@@ -13,7 +13,7 @@ class AllenCahnFTCS(ACNumericalSolver):
         super().__init__(n_spatial, n_temporal, **kwargs)
 
         # Design matrices
-        self.c = 0.0001 / (self.h ** 2)  # CHANGED
+        self.c = 0.0001 / (self.h ** 2)
         self.A = sparse.diags([self.k * self.c, 1 + self.k * (5 - 2 * self.c), self.k * self.c], [0, 1, 2],
                               shape=(self.n_spatial - 2, self.n_spatial)).toarray()
 

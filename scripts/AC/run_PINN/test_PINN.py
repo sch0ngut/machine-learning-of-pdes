@@ -1,11 +1,10 @@
 import time
-
-from machine_learning_solver.PINN import ACPINN
+from machine_learning_solver.PINN import AllenCahnPINN
 from util.generate_plots import *
 import tensorflow as tf
 
 tic = time.time()
-pinn = ACPINN(n_coll=10000, loss_obj=tf.keras.losses.MeanAbsoluteError())
+pinn = AllenCahnPINN(n_coll=10000, loss_obj=tf.keras.losses.MeanAbsoluteError())
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(max_n_epochs=3, min_mse=0.0005, track_losses=True, batch_size='full')
 print(f"Evaluated time: {time.time()-tic}")

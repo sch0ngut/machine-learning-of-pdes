@@ -93,7 +93,7 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
 
     # Contour Plot
     ax0 = plt.subplot(gs[0])
-    cf0 = ax0.contourf(t_mesh, x_mesh, u.T, np.arange(-1.0, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
+    cf0 = ax0.contourf(t_mesh, x_mesh, u.T, np.arange(-1.01, 1.01, .01), vmin=-1, vmax=1, cmap=plt.cm.jet)
     cbar0 = plt.colorbar(cf0)
     cbar0.set_ticks(np.linspace(-1, 1, 5, endpoint=True))
     ax0.set_ylabel(r'$x$')
