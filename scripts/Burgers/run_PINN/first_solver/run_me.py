@@ -1,8 +1,8 @@
-from burgers_ml.PINN import PINN
+from machine_learning_solver.PINN import PINNBurgers
 from util.generate_plots import *
 
 # Initialise network and train
-pinn = PINN()
+pinn = PINNBurgers()
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(min_mse=0.0005, track_losses=True, batch_size='full')
 

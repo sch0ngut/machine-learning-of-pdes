@@ -1,11 +1,11 @@
 import time
 
-from burgers_ml.PINN import PINN
+from machine_learning_solver.PINN import PINNBurgers
 from util.generate_plots import *
 import tensorflow as tf
 
 tic = time.time()
-pinn = PINN(n_coll=10000, loss_obj=tf.keras.losses.MeanAbsoluteError())
+pinn = PINNBurgers(n_coll=10000, loss_obj=tf.keras.losses.MeanAbsoluteError())
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(max_n_epochs=3, min_mse=0.0005, track_losses=True, batch_size='full')
 print(f"Evaluated time: {time.time()-tic}")

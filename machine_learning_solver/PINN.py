@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
 from typing import Union, List
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-from util.data_loader import data_loader
+from util.data_loader import *
 from sklearn.metrics import mean_squared_error
 
 
-class PINN:
+class PINN(ABC):
     def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
                  loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), dropout: bool = False, n_spatial: int = 321,
                  n_temporal: int = 101, tf_seed: int = 1, np_seed: int = 1) -> None:
@@ -51,7 +52,7 @@ class PINN:
         # Network evaluation
         self.n_spatial = n_spatial
         self.n_temporal = n_temporal
-        self.x, self.t, self.u_exact = data_loader(self.n_spatial, self.n_temporal)
+        self.x, self.t, self.u_exact = self.data_loader()
         x_mesh, t_mesh = np.meshgrid(self.x, self.t)
         self.eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
         self.eval_tar = self.u_exact.flatten(order='F')[:, None]
@@ -83,21 +84,7 @@ class PINN:
         :param equidistant: Whether the training points are equidistant or randomly sampled
         """
         # Generate data
-        if equidistant:
-            x = np.linspace(-1, 1, n_initial)
-            u0 = np.zeros(n_initial)
-            u0[1:-1] = -np.sin(np.pi * x[1:-1])
-            t = np.linspace(1 / n_boundary, 1, n_boundary)
-            data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
-            data_boundary1 = pd.DataFrame({"x": np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
-            data_boundary2 = pd.DataFrame({"x": -np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
-        else:
-            x = -1 + 2 * np.random.rand(n_initial)
-            data_t0 = pd.DataFrame({'x': x, 't': np.zeros(n_initial), 'u': -np.sin(np.pi * x)})
-            t1 = np.random.rand(n_boundary)
-            data_boundary1 = pd.DataFrame({'x': np.ones(n_boundary), 't': t1, 'u': np.zeros(n_boundary)})
-            t2 = np.random.rand(n_boundary)
-            data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': np.zeros(n_boundary)})
+        data_t0, data_boundary1, data_boundary2 = self.generate_ic_and_bc(n_initial, n_boundary, equidistant)
 
         # Set training data
         self.train_data = pd.concat([data_t0, data_boundary1, data_boundary2])
@@ -135,7 +122,8 @@ class PINN:
         epochs
         """
 
-        while self.epoch < max_n_epochs and self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss\
+        while self.epoch < max_n_epochs and self.loss_obj(self.network(self.train_feat),
+                                                          self.train_tar) > min_train_loss \
                 and self.mse >= min_mse:
 
             self.epoch += 1
@@ -186,34 +174,6 @@ class PINN:
         preds = self.network(self.eval_feat)
         return np.reshape(preds, (self.n_temporal, self.n_spatial)).T
 
-    def get_coll_loss(self) -> tf.Tensor:
-        """
-        Computes the regularisation term of the loss function using the collocation points and automatic differentiation
-
-        :return: The loss value as a tensor
-        """
-        with tf.GradientTape() as t1:
-            t1.watch(self.coll_points)
-            with tf.GradientTape() as t2:
-                t2.watch(self.coll_points)
-                # predicted solution on coll_points
-                u_coll = self.network(self.coll_points)
-                u_coll = tf.gather(u_coll, 0, axis=1)
-            # 1st order derivative
-            u_coll_grads = t2.gradient(u_coll, self.coll_points)
-            u_coll_x = tf.gather(u_coll_grads, 0, axis=1)
-            u_coll_t = tf.gather(u_coll_grads, 1, axis=1)
-        # 2nd order derivative
-        u_coll_grads_2 = t1.gradient(u_coll_grads, self.coll_points)
-        u_coll_xx = tf.gather(u_coll_grads_2, 0, axis=1)
-
-        loss_coll_vec = u_coll_t + tf.multiply(u_coll, u_coll_x) - (0.01 / np.pi) * u_coll_xx
-        loss_coll = self.loss_obj(loss_coll_vec, tf.zeros((self.n_coll,)))
-
-        del t1, t2
-
-        return loss_coll
-
     def get_loss_gradients(self, train_feat_batch: tf.Tensor, train_tar_batch: tf.Tensor) -> List[tf.Tensor]:
         """
         Computes the gradient of the overall loss functions, i.e. the loss function containing both the loss on some
@@ -254,3 +214,69 @@ class PINN:
         if shuffle:
             data_set = data_set.shuffle(data_copy.shape[0], reshuffle_each_iteration=False)
         return data_set.batch(batch_size, drop_remainder=False)
+
+    @abstractmethod
+    def data_loader(self):
+        pass
+
+    @abstractmethod
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
+        pass
+
+    @abstractmethod
+    def get_coll_loss(self):
+        pass
+
+
+class PINNBurgers(PINN):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
+        if equidistant:
+            x = np.linspace(-1, 1, n_initial)
+            u0 = np.zeros(n_initial)
+            u0[1:-1] = -np.sin(np.pi * x[1:-1])
+            t = np.linspace(1 / n_boundary, 1, n_boundary)
+            data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
+            data_boundary1 = pd.DataFrame({"x": np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
+            data_boundary2 = pd.DataFrame({"x": -np.ones(n_boundary), "t": t, "u": np.zeros(n_boundary)})
+        else:
+            x = -1 + 2 * np.random.rand(n_initial)
+            data_t0 = pd.DataFrame({'x': x, 't': np.zeros(n_initial), 'u': -np.sin(np.pi * x)})
+            t1 = np.random.rand(n_boundary)
+            data_boundary1 = pd.DataFrame({'x': np.ones(n_boundary), 't': t1, 'u': np.zeros(n_boundary)})
+            t2 = np.random.rand(n_boundary)
+            data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': np.zeros(n_boundary)})
+        return data_t0, data_boundary1, data_boundary2
+
+    def data_loader(self):
+        return burgers_data_loader(self.n_spatial, self.n_temporal)
+
+    def get_coll_loss(self) -> tf.Tensor:
+        """
+        Computes the regularisation term of the loss function using the collocation points and automatic differentiation
+
+        :return: The loss value as a tensor
+        """
+        with tf.GradientTape() as t1:
+            t1.watch(self.coll_points)
+            with tf.GradientTape() as t2:
+                t2.watch(self.coll_points)
+                # predicted solution on coll_points
+                u_coll = self.network(self.coll_points)
+                u_coll = tf.gather(u_coll, 0, axis=1)
+            # 1st order derivative
+            u_coll_grads = t2.gradient(u_coll, self.coll_points)
+            u_coll_x = tf.gather(u_coll_grads, 0, axis=1)
+            u_coll_t = tf.gather(u_coll_grads, 1, axis=1)
+        # 2nd order derivative
+        u_coll_grads_2 = t1.gradient(u_coll_grads, self.coll_points)
+        u_coll_xx = tf.gather(u_coll_grads_2, 0, axis=1)
+
+        loss_coll_vec = u_coll_t + tf.multiply(u_coll, u_coll_x) - (0.01 / np.pi) * u_coll_xx
+        loss_coll = self.loss_obj(loss_coll_vec, tf.zeros((self.n_coll,)))
+
+        del t1, t2
+
+        return loss_coll

@@ -1,12 +1,12 @@
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from burgers_ml.PINN import PINN
-from numerical_solvers.Upwind import Upwind
+from machine_learning_solver.PINN import PINNBurgers
+from numerical_solvers.Burgers_Upwind import BurgersUpwind
 from util.generate_plots import *
 import numpy as np
 
 # Part 1: Build and train PINN
-pinn = PINN()
+pinn = PINNBurgers()
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(max_n_epochs=3000, min_mse=0.05, track_losses=True, batch_size='full')
 
@@ -26,7 +26,7 @@ feat = np.column_stack((np.linspace(-1, 1, n_spatial), np.zeros(n_spatial)))
 initial_data = pinn.network(feat)[:, 0]
 
 # Run solver
-upwind = Upwind(n_spatial=n_spatial, n_temporal=n_temporal, u0=initial_data, order=2)
+upwind = BurgersUpwind(n_spatial=n_spatial, n_temporal=n_temporal, u0=initial_data, order=2)
 upwind.time_integrate()
 
 # Get error and plot solution
