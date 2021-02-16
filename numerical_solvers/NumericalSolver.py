@@ -88,13 +88,6 @@ class NumericalSolverBurgers(NumericalSolver, ABC):
         # Load exact
         _, _, self.u_exact = burgers_data_loader(self.n_spatial, self.n_temporal)
 
-    # @abstractmethod
-    # def time_integrate(self) -> None:
-    #     """
-    #     Time integrates the ODE-system and stores the solution in self.u_exact
-    #     """
-    #     pass
-
 
 class NumericalSolverAC(NumericalSolver, ABC):
     def __init__(self, n_spatial, n_temporal, **kwargs):
@@ -111,10 +104,3 @@ class NumericalSolverAC(NumericalSolver, ABC):
 
         # Load exact
         _, _, self.u_exact = allen_cahn_data_loader()
-
-    # @abstractmethod
-    # def time_integrate(self) -> None:
-    #     """
-    #     Time integrates the ODE-system and stores the solution in self.u_exact
-    #     """
-    #     pass

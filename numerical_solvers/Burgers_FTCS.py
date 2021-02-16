@@ -1,9 +1,9 @@
 import numpy as np
 import scipy.sparse as sparse
-from burgers_numerical.NumericalSolver import NumericalSolverBurgers
+from numerical_solvers.NumericalSolver import NumericalSolverBurgers
 
 
-class FTCS(NumericalSolverBurgers):
+class BurgersFTCS(NumericalSolverBurgers):
     def __init__(self, n_spatial, n_temporal, nu=1/(100*np.pi), **kwargs):
         """
         :param n_spatial: Number of spatial discretisation points

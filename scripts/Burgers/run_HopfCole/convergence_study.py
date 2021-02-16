@@ -1,5 +1,5 @@
 import numpy as np
-from burgers_numerical.HopfCole import HopfCole
+from numerical_solvers.Burgers_HopfCole import BurgersHopfCole
 
 
 # Discretisation
@@ -14,7 +14,7 @@ l_max_errors = np.zeros(m)
 # Compute solution for each discretisation
 for i, n_spatial in enumerate(n_spatial_vec):
     print(n_spatial)
-    hopfcole = HopfCole(n_spatial=n_spatial, n_temporal=n_temporal)
+    hopfcole = BurgersHopfCole(n_spatial=n_spatial, n_temporal=n_temporal)
     hopfcole.time_integrate()
     l_2_errors[i] = hopfcole.get_l2_error()
     l_max_errors[i] = hopfcole.get_l_max_error()

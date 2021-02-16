@@ -1,7 +1,7 @@
-from burgers_numerical.FTCS import FTCS
+from numerical_solvers.Burgers_FTCS import BurgersFTCS
 from util.generate_plots import *
 
-ftcs = FTCS(n_spatial=321, n_temporal=10**3+1)
+ftcs = BurgersFTCS(n_spatial=321, n_temporal=10**3+1)
 ftcs.time_integrate()
 print(ftcs.get_l2_error())
 print(ftcs.get_mean_squared_error())

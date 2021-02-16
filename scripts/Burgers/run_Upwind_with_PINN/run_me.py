@@ -1,7 +1,7 @@
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from burgers_ml.PINN import PINN
-from burgers_numerical.Upwind import Upwind
+from numerical_solvers.Upwind import Upwind
 from util.generate_plots import *
 import numpy as np
 
