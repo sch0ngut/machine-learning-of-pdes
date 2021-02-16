@@ -73,7 +73,7 @@ class NumericalSolver(ABC):
         return np.amax(abs(self.u_exact - self.u_numerical))
 
 
-class NumericalSolverBurgers(NumericalSolver, ABC):
+class BurgersNumericalSolver(NumericalSolver, ABC):
     def __init__(self, n_spatial, n_temporal, nu: float = 1/(100*np.pi), **kwargs):
         super().__init__(n_spatial, n_temporal, **kwargs)
         self.nu = nu
@@ -89,7 +89,7 @@ class NumericalSolverBurgers(NumericalSolver, ABC):
         _, _, self.u_exact = burgers_data_loader(self.n_spatial, self.n_temporal)
 
 
-class NumericalSolverAC(NumericalSolver, ABC):
+class ACNumericalSolver(NumericalSolver, ABC):
     def __init__(self, n_spatial, n_temporal, **kwargs):
         super().__init__(n_spatial, n_temporal, **kwargs)
 

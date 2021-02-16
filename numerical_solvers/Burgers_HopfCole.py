@@ -1,9 +1,9 @@
 import numpy as np
 import scipy.sparse as sparse
-from numerical_solvers.NumericalSolver import NumericalSolverBurgers
+from numerical_solvers.NumericalSolver import BurgersNumericalSolver
 
 
-class BurgersHopfCole(NumericalSolverBurgers):
+class BurgersHopfCole(BurgersNumericalSolver):
     def __init__(self, n_spatial, n_temporal, nu=1/(100*np.pi), **kwargs):
         """
         :param n_spatial: Number of spatial discretisation points

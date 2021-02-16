@@ -1,12 +1,12 @@
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from machine_learning_solver.PINN import PINNBurgers
+from machine_learning_solver.PINN import BurgersPINN
 from numerical_solvers.Burgers_Upwind import BurgersUpwind
 from util.generate_plots import *
 import numpy as np
 
 # Part 1: Build and train PINN
-pinn = PINNBurgers()
+pinn = BurgersPINN()
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
 pinn.perform_training(max_n_epochs=3000, min_mse=0.05, track_losses=True, batch_size='full')
 

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Union, List
 import tensorflow as tf
-import numpy as np
 import pandas as pd
 from util.data_loader import *
 from sklearn.metrics import mean_squared_error
@@ -228,7 +227,7 @@ class PINN(ABC):
         pass
 
 
-class PINNBurgers(PINN):
+class BurgersPINN(PINN):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

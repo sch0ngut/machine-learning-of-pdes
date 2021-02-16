@@ -1,8 +1,8 @@
-from numerical_solvers.NumericalSolver import NumericalSolverAC
+from numerical_solvers.NumericalSolver import ACNumericalSolver
 import scipy.sparse as sparse
 
 
-class AllenCahnFTCS(NumericalSolverAC):
+class AllenCahnFTCS(ACNumericalSolver):
     def __init__(self, n_spatial, n_temporal, **kwargs):
         """
         :param n_spatial: Number of spatial discretisation points
