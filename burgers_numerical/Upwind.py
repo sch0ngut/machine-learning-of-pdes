@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import linalg
-from burgers_numerical.NumericalSolver import NumericalSolver
+from burgers_numerical.NumericalSolver import NumericalSolverBurgers
 
 
-class Upwind(NumericalSolver):
+class Upwind(NumericalSolverBurgers):
     def __init__(self, n_spatial: int, n_temporal: int, order: int = 1, nu: float = 1/(100*np.pi), **kwargs) -> None:
         """
         :param n_spatial: Number of spatial discretisation points
