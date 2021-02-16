@@ -16,6 +16,18 @@ generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat)
 
 plot_df = pinn.loss_df[['loss_IC', 'loss_BC', 'loss_coll', 'error']]
 plot_df.columns = ['loss on initial data', 'loss on boundary data', 'loss on collocation points', 'error']
-generate_loss_plot(plot_df)
+color_dict = {
+    'loss on initial data': 'green',
+    'loss on boundary data': 'blue',
+    'loss on collocation points': 'orange',
+    'error': 'red'
+}
+label_dict = {
+    'loss on initial data': r'$L^{initial}$',
+    'loss on boundary data': r'$L^{boundary}$',
+    'loss on collocation points': r'$L^{physics}$',
+    'error': r'$\varepsilon_{MAE}$'
+}
+generate_loss_plot(plot_df, color_dict=color_dict, label_dict=label_dict)
 
 
