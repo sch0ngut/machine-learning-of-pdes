@@ -73,13 +73,6 @@ class PINN:
         self.mse = mean_squared_error(self.network(self.eval_feat), self.eval_tar)
         self.loss_df = pd.DataFrame(
             columns=['epoch', 'loss_IC', 'loss_BC', 'loss_train', 'loss_coll', 'loss_tot', 'error']).set_index('epoch')
-        self.loss_df.loc[self.epoch] = self.get_losses()
-        print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
-              format(0,
-                     self.loss_df.loc[self.epoch, 'loss_tot'],
-                     self.loss_df.loc[self.epoch, 'loss_train'],
-                     self.loss_df.loc[self.epoch, 'loss_coll'],
-                     self.loss_df.loc[self.epoch, 'error']))
 
     def generate_training_data(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> None:
         """
@@ -117,6 +110,15 @@ class PINN:
             iter(self.batch_and_split_data(self.initial_train_data)))
         self.boundary_train_feat, self.boundary_train_tar = next(
             iter(self.batch_and_split_data(self.boundary_train_data)))
+
+        # Compute the initial losses using the generated training data
+        self.loss_df.loc[self.epoch] = self.get_losses()
+        print("Epoch {:03d}: loss_tot: {:.3f}, loss_train: {:.3f}, loss_coll: {:.3f}, error: {:.3f}".
+              format(0,
+                     self.loss_df.loc[self.epoch, 'loss_tot'],
+                     self.loss_df.loc[self.epoch, 'loss_train'],
+                     self.loss_df.loc[self.epoch, 'loss_coll'],
+                     self.loss_df.loc[self.epoch, 'error']))
 
     def perform_training(self, max_n_epochs: int = 99999, min_train_loss: float = 0, min_mse: float = 0,
                          batch_size='full', optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> None:

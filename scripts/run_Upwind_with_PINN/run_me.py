@@ -1,4 +1,4 @@
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from burgers_ml.PINN import PINN
 from burgers_numerical.Upwind import Upwind
@@ -37,9 +37,9 @@ print(f"Upwind MSE: {upwind.get_mean_squared_error()}")
 
 # ToDo: Change file name
 # generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical)
-file_name = "epochs=3000.jpg"
-generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical,
-                                         savefig_path=f'scripts/run_Upwind_with_PINN/preliminary_results/{file_name}')
+file_name = "PINN_vs_Upwind_epochs=3000.jpg"
+generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical, train_feat=pinn.train_feat,
+                                         savefig_path=f'scripts/run_Upwind_with_PINN/{file_name}')
 
 # Compute error between Upwind and PINN solution
 x = np.linspace(-1, 1, n_spatial)
@@ -49,3 +49,5 @@ eval_feat = np.hstack((x_mesh.flatten()[:, None], t_mesh.flatten()[:, None]))
 pinn_u_pred = np.reshape(pinn.network(eval_feat), (n_temporal, n_spatial)).T
 
 print(f"MAE(Upwind - PINN): {mean_absolute_error(pinn_u_pred, upwind.u_numerical)}")
+print(f"MSE(Upwind - PINN): {mean_squared_error(pinn_u_pred, upwind.u_numerical)}")
+print(f"L2(Upwind - PINN): {np.sqrt(mean_squared_error(pinn_u_pred, upwind.u_numerical))}")
