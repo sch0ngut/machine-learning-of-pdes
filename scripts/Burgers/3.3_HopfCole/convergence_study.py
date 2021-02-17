@@ -1,7 +1,6 @@
 import numpy as np
 from numerical_solvers.Burgers_HopfCole import BurgersHopfCole
 
-
 # Discretisation
 n_spatial_vec = [161, 321, 641, 1281, 2561, 5121]
 n_temporal = 10**4+1

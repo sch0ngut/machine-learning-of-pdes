@@ -4,7 +4,7 @@ from util.generate_plots import *
 # Initialise network and train
 pinn = BurgersPINN()
 pinn.generate_training_data(n_initial=50, n_boundary=25, equidistant=False)
-pinn.perform_training(max_n_epochs=50, min_mse=0.0005, track_losses=True, batch_size='full')
+pinn.perform_training(max_n_epochs=50, track_losses=True, batch_size='full')
 
 # Plot solution
 generate_contour_plot(pinn.u_pred, train_feat=pinn.train_feat)

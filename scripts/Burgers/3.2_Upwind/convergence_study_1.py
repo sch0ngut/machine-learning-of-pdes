@@ -1,8 +1,7 @@
 import numpy as np
 from numerical_solvers.Burgers_Upwind import BurgersUpwind
 
-
-# Order of the upwind scheme: either 1 or 2
+# Order of the upwind scheme
 order = 1
 
 # Discretisation
