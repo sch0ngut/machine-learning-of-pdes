@@ -3,12 +3,12 @@ import scipy.sparse as sparse
 
 
 class AllenCahnFTCS(ACNumericalSolver):
-    def __init__(self, n_spatial, n_temporal, **kwargs):
+    def __init__(self, n_spatial, n_temporal, **kwargs) -> None:
         """
         :param n_spatial: Number of spatial discretisation points
         :param n_temporal: Number of temporal discretisation points
-        :param nu: The viscosity parameter of the Burgers' equation # NOT NEEDED
-        :param kwargs: allows to pass a vector of initial values via the argument u0
+        :param kwargs:
+            - u0: allow to pass a vector containing the initial condition. Should have length=n_spatial
         """
         super().__init__(n_spatial, n_temporal, **kwargs)
 

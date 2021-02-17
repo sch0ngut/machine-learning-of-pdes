@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union, List
+from typing import Union, List, Tuple
 import tensorflow as tf
 import pandas as pd
 from util.data_loader import *
@@ -7,16 +7,22 @@ from sklearn.metrics import mean_squared_error
 
 
 class PINN(ABC):
-    def __init__(self, act_fun: str = "tanh", n_nodes: int = 20, n_layers: int = 8, n_coll: int = 10000,
-                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(), dropout: bool = False, n_spatial: int = 321,
-                 n_temporal: int = 101, tf_seed: int = 1, np_seed: int = 1) -> None:
+    def __init__(self,
+                 act_fun: str = "tanh",
+                 n_nodes: int = 20,
+                 n_layers: int = 8,
+                 n_coll: int = 10000,
+                 loss_obj: tf.losses = tf.keras.losses.MeanAbsoluteError(),
+                 n_spatial: int = 321,
+                 n_temporal: int = 101,
+                 tf_seed: int = 1,
+                 np_seed: int = 1) -> None:
         """
         :param act_fun: Activation function at each node of the neural network
         :param n_nodes: Number of nodes of each hidden layer
         :param n_layers: Number of hidden layers
         :param n_coll: Number of collocation points used to evaluate the regularisation term during model training
         :param loss_obj: The loss function to use during model training
-        :param dropout: Whether to use dropout
         :param n_spatial: Number of spatial discretisation points used for model evaluation
         :param n_temporal: Number of temporal discretisation points used for model evaluation
         :param tf_seed: Tensorflow seed to generate reproducable results
@@ -33,19 +39,12 @@ class PINN(ABC):
         self.n_coll = n_coll
         self.coll_points = tf.random.uniform(shape=[n_coll, 2], minval=[-1, 0], maxval=[1, 1])
         self.loss_obj = loss_obj
-        self.dropout = dropout
 
         # Network initialisation
         self.network = tf.keras.Sequential(
             [tf.keras.layers.Dense(units=self.n_nodes, activation=self.act_fun, input_shape=(2,))])
-        # ToDo: check if should be kept
-        if dropout:
-            self.network.add(tf.keras.layers.Dropout(rate=1))
         for i in range(self.n_layers):
             self.network.add(tf.keras.layers.Dense(self.n_nodes, activation=self.act_fun))
-            # ToDo: check if should be kept
-            if dropout:
-                self.network.add(tf.keras.layers.Dropout(rate=1))
         self.network.add(tf.keras.layers.Dense(1))
 
         # Network evaluation
@@ -76,7 +75,7 @@ class PINN(ABC):
 
     def generate_training_data(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> None:
         """
-        Generates the training data on the initial and boundary intervals with a uniform distance
+        Generates the training data on the initial and boundary intervals
 
         :param n_initial: Number of training points at t=0
         :param n_boundary: Number of training points on each of the two boundaries (x=-1, x=1)
@@ -106,24 +105,31 @@ class PINN(ABC):
                      self.loss_df.loc[self.epoch, 'loss_coll'],
                      self.loss_df.loc[self.epoch, 'error']))
 
-    def perform_training(self, max_n_epochs: int = 99999, min_train_loss: float = 0, min_mse: float = 0,
-                         batch_size='full', optimizer=tf.keras.optimizers.Adam(), track_losses=True) -> None:
+    def perform_training(self,
+                         max_n_epochs: int = 99999,
+                         min_train_loss: float = 0,
+                         min_mse: float = 0,
+                         batch_size='full',
+                         optimizer=tf.keras.optimizers.Adam(),
+                         track_losses=True) -> None:
         """
-        Trains the network until a maximum given number of epochs or minimum loss on the training data is achieved.
+        Trains the network until one of the following stopping criteria is achieved:
+            - maximum number of epochs
+            - minimum loss on the training data
+            - minimum MSE.
 
         :param max_n_epochs: Stopping criterion: The maximum number of epochs
         :param min_train_loss: Stopping criterion: The minimum loss on the training data
         :param min_mse: Stopping criterion: The minimum mean squared error
-        :param batch_size: Yhe batch size used during model training
+        :param batch_size: The batch size used during model training
         :param optimizer: The optimizer used for model training
         :param track_losses: Whether to track the losses in each epoch. Setting to False speeds up the computation
         :return: A data frame with the loss on training and collocation points together with the error at the given
         epochs
         """
-
-        while self.epoch < max_n_epochs and self.loss_obj(self.network(self.train_feat),
-                                                          self.train_tar) > min_train_loss \
-                and self.mse >= min_mse:
+        while self.epoch < max_n_epochs and \
+                self.loss_obj(self.network(self.train_feat), self.train_tar) > min_train_loss and \
+                self.mse >= min_mse:
 
             self.epoch += 1
 
@@ -168,6 +174,7 @@ class PINN(ABC):
     def get_predictions_as_matrix(self) -> np.ndarray:
         """
         Generates the network's solution on the evaluation features
+
         :return: The predictions as an (n_spatial x n_temporal) - array
         """
         preds = self.network(self.eval_feat)
@@ -178,9 +185,8 @@ class PINN(ABC):
         Computes the gradient of the overall loss functions, i.e. the loss function containing both the loss on some
         given training data and the loss on the collocation points
 
-        :param train_feat_batch: The features of the training data
-        :param train_tar_batch: The targets of the training data
-
+        :param train_feat_batch: A batch of features of the training data
+        :param train_tar_batch: A batch of targets of the training data
         :return: A list of Tensors where each entry contains the gradients of the weights or the biases of one layer of
         the neural network
         """
@@ -194,13 +200,15 @@ class PINN(ABC):
         return loss_gradients
 
     @staticmethod
-    def batch_and_split_data(data: pd.DataFrame, batch_size: Union[int, str] = 'full', shuffle: bool = True):
+    def batch_and_split_data(data: pd.DataFrame,
+                             batch_size: Union[int, str] = 'full',
+                             shuffle: bool = True) -> tf.data.Dataset:
         """
         Takes a data frame, batches it and splits the batches into features and labels
 
         :param data: The data frame consisting of both features and targets
         :param batch_size: The desired batch size. Should be an integer or alternatively 'full'
-        :param shuffle: Whether the data is shuffled before batching
+        :param shuffle: Whether the data should be shuffled before batching
         :return: An iterator containing the the batches. Each batch consists of two tensors. One containing the
         features and one containing the targets
         """
@@ -215,15 +223,36 @@ class PINN(ABC):
         return data_set.batch(batch_size, drop_remainder=False)
 
     @abstractmethod
-    def data_loader(self):
+    def data_loader(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Loads the exact solution to the underlying problem
+
+        :return: spatial and temporal discretisation together with exact solution
+        """
         pass
 
     @abstractmethod
-    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> Tuple[pd.DataFrame,
+                                                                                                     pd.DataFrame,
+                                                                                                     pd.DataFrame]:
+        """
+        Generates three data frames with the initial and boundary data
+
+        :param n_initial: Number of training points at t=0
+        :param n_boundary: Number of training points on each of the two boundaries (x=-1, x=1)
+        :param equidistant: Whether the training points are equidistant or randomly sampled
+        :return: initial and boundary data in three separate data frames
+        """
         pass
 
     @abstractmethod
-    def get_coll_loss(self):
+    def get_coll_loss(self) -> tf.Tensor:
+        """
+        Computes the regularisation term of the loss function using the collocation points, automatic differentiation
+        and the underlying PDE
+
+        :return: The loss value as a tensor
+        """
         pass
 
 
@@ -232,9 +261,23 @@ class BurgersPINN(PINN):
         super().__init__(*args, **kwargs)
 
     def data_loader(self):
+        """
+        Loads the exact solution to the Burgers equation
+
+        :return: spatial and temporal discretisation together with exact solution
+        """
         return burgers_data_loader(self.n_spatial, self.n_temporal)
 
-    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> Tuple[pd.DataFrame,
+                                                                                                     pd.DataFrame,
+                                                                                                     pd.DataFrame]:
+        """
+        Generates three data frames with the initial and boundary data for the problem involving the Burgers equation
+
+        :param n_initial: Number of training points at t=0
+        :param n_boundary: Number of training points on each of the two boundaries (x=-1, x=1)
+        :param equidistant: Whether the training points are equidistant or randomly sampled
+        """
         if equidistant:
             x = np.linspace(-1, 1, n_initial)
             u0 = np.zeros(n_initial)
@@ -255,7 +298,8 @@ class BurgersPINN(PINN):
 
     def get_coll_loss(self) -> tf.Tensor:
         """
-        Computes the regularisation term of the loss function using the collocation points and automatic differentiation
+        Computes the regularisation term of the loss function using the collocation points, automatic differentiation
+        and the Burgers equation
 
         :return: The loss value as a tensor
         """
@@ -287,47 +331,25 @@ class AllenCahnPINN(PINN):
         super().__init__(n_spatial=512, n_temporal=201, *args, **kwargs)
 
     def data_loader(self):
+        """
+        Loads the exact solution to the Allen-Cahn equation
+
+        :return: spatial and temporal discretisation together with exact solution
+        """
         return allen_cahn_data_loader()
 
-    def get_coll_loss(self) -> tf.Tensor:
+    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True) -> Tuple[pd.DataFrame,
+                                                                                                     pd.DataFrame,
+                                                                                                     pd.DataFrame]:
         """
-        Computes the regularisation term of the loss function using the collocation points and automatic differentiation
+        Generates three data frames with the initial and boundary data for the problem involving the Allen-Cahn equation
 
-        :return: The loss value as a tensor
+        :param n_initial: Number of training points at t=0
+        :param n_boundary: Number of training points on each of the two boundaries (x=-1, x=1)
+        :param equidistant: Whether the training points are equidistant or randomly sampled
         """
-        with tf.GradientTape(persistent=True) as t1:
-            t1.watch(self.coll_points)
-            with tf.GradientTape(persistent=True) as t2:
-                t2.watch(self.coll_points)
-                # predicted solution on coll_points
-                u_coll = self.network(self.coll_points)
-                u_coll = tf.gather(u_coll, 0, axis=1)
-            # 1st order derivative
-            u_coll_grads = t2.gradient(u_coll, self.coll_points)
-            u_coll_x = tf.gather(u_coll_grads, 0, axis=1)
-            u_coll_t = tf.gather(u_coll_grads, 1, axis=1)
-        # 2nd order derivative
-        u_coll_grads_2 = t1.gradient(u_coll_grads, self.coll_points)
-        u_coll_xx = tf.gather(u_coll_grads_2, 0, axis=1)
-
-        # ToDo:
-        #         loss_coll_vec = u_coll_t + tf.multiply(u_coll, u_coll_x) - (0.01 / np.pi) * u_coll_xx
-        loss_coll_vec = u_coll_t - 0.0001 * u_coll_xx + 5 * tf.multiply(u_coll,
-                                                                        tf.multiply(u_coll, u_coll)) - 5 * u_coll
-        #         loss_coll_vec = u_coll_t - u_coll_xx -1 + np.pi ** 2 * tf.math.sin(np.pi * self.coll_points[:,0])
-        #         loss_coll_vec = u_coll_t - u_coll_xx -1 + tf.math.cos(np.pi * self.coll_points[:,0]) * (2 - np.pi**2 * self.coll_points[:,0]**2) - 4 * np.pi * self.coll_points[:,0] * tf.math.sin(np.pi * self.coll_points[:,0])
-        loss_coll = self.loss_obj(loss_coll_vec, tf.zeros((self.n_coll,)))
-
-        del t1, t2
-
-        return loss_coll
-
-    def generate_ic_and_bc(self, n_initial: int, n_boundary: int, equidistant: bool = True):
         if equidistant:
             x = np.linspace(-1, 1, n_initial)
-            # ToDo
-            #             u0 = np.zeros(n_initial)
-            #             u0[1:-1] = -np.sin(np.pi * x[1:-1])
             u0 = x ** 2 * np.cos(np.pi * x)
             t = np.linspace(1 / n_boundary, 1, n_boundary)
             data_t0 = pd.DataFrame({"x": x, "t": np.zeros(n_initial), "u": u0})
@@ -342,3 +364,33 @@ class AllenCahnPINN(PINN):
             data_boundary2 = pd.DataFrame({'x': -1 * np.ones(n_boundary), 't': t2, 'u': -np.ones(n_boundary)})
 
         return data_t0, data_boundary1, data_boundary2
+
+    def get_coll_loss(self) -> tf.Tensor:
+        """
+        Computes the regularisation term of the loss function using the collocation points, automatic differentiation
+        and the Allen-Cahn equation
+
+        :return: The loss value as a tensor
+        """
+        with tf.GradientTape() as t1:
+            t1.watch(self.coll_points)
+            with tf.GradientTape() as t2:
+                t2.watch(self.coll_points)
+                # predicted solution on coll_points
+                u_coll = self.network(self.coll_points)
+                u_coll = tf.gather(u_coll, 0, axis=1)
+            # 1st order derivative
+            u_coll_grads = t2.gradient(u_coll, self.coll_points)
+            u_coll_t = tf.gather(u_coll_grads, 1, axis=1)
+        # 2nd order derivative
+        u_coll_grads_2 = t1.gradient(u_coll_grads, self.coll_points)
+        u_coll_xx = tf.gather(u_coll_grads_2, 0, axis=1)
+
+        loss_coll_vec = u_coll_t - 0.0001 * u_coll_xx + 5 * tf.multiply(u_coll,
+                                                                        tf.multiply(u_coll, u_coll)) - 5 * u_coll
+        loss_coll = self.loss_obj(loss_coll_vec, tf.zeros((self.n_coll,)))
+
+        del t1, t2
+
+        return loss_coll
+

@@ -27,6 +27,14 @@ def burgers_data_loader(n_spatial: int, n_temporal: int) -> np.ndarray:
 
 
 def allen_cahn_data_loader() -> np.ndarray:
+    """
+    Loads th exact solution of the Allen-Cahn equation
+
+    :return:
+        x: (1 x n_spatial) array with the x-coordinates
+        tt: (1 x nn_temporal) array with the t-coordinates
+        uu: (n_spatial x n_temporal) array with the exact solution
+    """
     data = scipy.io.loadmat(
         f'allen_cahn_exact/AC.mat')
     return np.real(data['x']), np.real(data['tt']), np.real(data['uu'])

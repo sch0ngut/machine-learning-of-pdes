@@ -18,6 +18,6 @@ for n_temporal = n_temporal_vec
 %         title(['H=' num2str(n_spatial-1) ', K=' num2str(n_temporal-1)]);
 %         saveas(gcf, join([save_figs_path, 'K=' num2str(n_temporal-1), '_H=', num2str(n_spatial-1),'_.jpg'], ""))
 %         close(gcf)
-        save(join(['solutions/burgers_exact_K=' num2str(n_temporal-1), '_H=', num2str(n_spatial-1)], ""), 'x', 't', 'u')
+        save(join(['burgers_exact/solutions/burgers_exact_K=' num2str(n_temporal-1), '_H=', num2str(n_spatial-1)], ""), 'x', 't', 'u')
     end
 end

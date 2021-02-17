@@ -4,12 +4,13 @@ from numerical_solvers.NumericalSolver import BurgersNumericalSolver
 
 
 class BurgersFTCS(BurgersNumericalSolver):
-    def __init__(self, n_spatial, n_temporal, nu=1/(100*np.pi), **kwargs):
+    def __init__(self, n_spatial, n_temporal, nu=1/(100*np.pi), **kwargs) -> None:
         """
         :param n_spatial: Number of spatial discretisation points
         :param n_temporal: Number of temporal discretisation points
         :param nu: The viscosity parameter of the Burgers' equation
-        :param kwargs: allows to pass a vector of initial values via the argument u0
+        :param kwargs:
+            - u0: allow to pass a vector containing the initial condition. Should have length=n_spatial
         """
         super().__init__(n_spatial, n_temporal, nu, **kwargs)
 
@@ -29,7 +30,6 @@ class BurgersFTCS(BurgersNumericalSolver):
         """
         Forward Euler time integrator
         """
-
         for n in range(self.n_temporal - 1):
             u_n = self.u_numerical[:, n]
             u_n_inner = u_n[1:self.n_spatial-1]

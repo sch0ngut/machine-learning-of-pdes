@@ -27,6 +27,6 @@ __pycache__/
 
 .DS_Store
 .idea
-/scripts/Burgers/run_Upwind_with_PINN/preliminary_results/
-/scripts/Burgers/run_PINN/first_solver_v2/
-/scripts/Burgers/run_PINN/training_samples_convergence/
+/scripts/Burgers/4.2.2_run_Upwind_with_PINN/preliminary_results/
+/scripts/Burgers/4.2.1_4.2.2_PINN/first_solver_v2/
+/scripts/Burgers/4.2.1_4.2.2_PINN/training_samples_convergence/

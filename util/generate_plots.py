@@ -41,7 +41,8 @@ def generate_contour_plot(u: np.ndarray, savefig_path="", legend_loc='upper righ
     plt.show()
 
 
-def generate_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
+def generate_snapshots_plot(u: np.ndarray,
+                            t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
                             savefig_path: str = "") -> None:
     """
     Generates a time snapshots plot
@@ -70,8 +71,11 @@ def generate_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 
     plt.show()
 
 
-def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
-                                        savefig_path: str = "", legend_loc: str = 'upper right', **kwargs) -> None:
+def generate_contour_and_snapshots_plot(u: np.ndarray,
+                                        t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
+                                        savefig_path: str = "",
+                                        legend_loc: str = 'upper right',
+                                        **kwargs) -> None:
     """
     Generates a contour and time snapshots plot in one figure
 
@@ -110,7 +114,6 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     ax1 = plt.subplot(gs[1])
     for t_val in t_vec:
         j = int(t_val * (n_temporal-1))
-        # plt.plot(x, u_exact[:, j], label=r'$t={{{}}}$'.format(t_val))
         ax1.plot(x, u[:, j], label=r'$t={{{}}}$'.format(t_val))
     ax1.legend()
     ax1.set_ylabel(r'$u(x,t)$')
@@ -123,9 +126,12 @@ def generate_contour_and_snapshots_plot(u: np.ndarray, t_vec: np.array = np.arra
     plt.show()
 
 
-def generate_two_contour_and_snapshots_plots(u1: np.ndarray, u2: np.ndarray,
+def generate_two_contour_and_snapshots_plots(u1: np.ndarray,
+                                             u2: np.ndarray,
                                              t_vec: np.array = np.array([0, 0.25, 0.5, 0.75, 1]),
-                                             savefig_path: str = "", legend_loc: str= 'upper right', **kwargs) -> None:
+                                             savefig_path: str = "",
+                                             legend_loc: str = 'upper right',
+                                             **kwargs) -> None:
     """
     Generates two contour and time snapshots plot in one figure
 
@@ -205,12 +211,13 @@ def generate_two_contour_and_snapshots_plots(u1: np.ndarray, u2: np.ndarray,
 
 def generate_loss_plot(loss_df: pd.DataFrame, savefig_path: str = None, **kwargs) -> None:
     """
-    Generates a plot of the losses and against the epochs
+    Generates a plot of the losses against the epochs
 
     :param loss_df: The data frame containing the different losses in the columns and the epochs as indices
     :param savefig_path: The path were to store the plot. Leave empty if saving of the file is not desired.
     :param kwargs:
         - color_dict: A dictionary assigning the column names of loss_df a color for plotting
+        - label_dict: A dictionary assigning the column names of loss_df a label for the legend
     """
     if 'color_dict' in kwargs:
         color_dict = kwargs.get('color_dict')

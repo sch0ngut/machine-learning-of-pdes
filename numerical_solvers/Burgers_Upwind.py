@@ -10,7 +10,8 @@ class BurgersUpwind(BurgersNumericalSolver):
         :param n_temporal: Number of temporal discretisation points
         :param order: The order of the upwind scheme. Should be either 1 or 2
         :param nu: The viscosity parameter of the Burgers' equation
-        :param kwargs: allows to pass a vector of initial values via the argument u0
+        :param kwargs:
+            - u0: allow to pass a vector containing the initial condition. Should have length=n_spatial
         """
         super().__init__(n_spatial, n_temporal, nu, **kwargs)
         self.order = order
@@ -28,26 +29,18 @@ class BurgersUpwind(BurgersNumericalSolver):
         Calculates the upwind term at a given time point
 
         :param u: Numerical solution for the given time point
-        :return: the upwind term as vector
+        :return: Upwind term as vector
         """
         n = u.size - 2  # Only required at inner points
         u_tilde = np.zeros(n)
 
         if self.order == 1:
-            # Alternative 1: makes use of the fact that solution is positive in [-1,0) and negative in (0,1]
+            # Make use of the fact that solution is positive in [-1,0) and negative in (0,1]
             u_tilde[0:int((n-1)/2)] = u[1:int((n-1)/2)+1] * (u[1:int((n-1)/2)+1] - u[0:int((n-1)/2)])
             u_tilde[int((n+1)/2):n] = u[int((n+1)/2)+1:n+1] * (u[int((n+1)/2)+2:n+2] - u[int((n+1)/2)+1:n+1])
 
-            # Alternative 2: does not make use of the above -> slower
-            # for i in range(n):
-            #     if u[i + 1] < 0:
-            #         u_tilde[i] = u[i + 1] * (u[i + 2] - u[i + 1])
-            #     else:
-            #         u_tilde[i] = u[i + 1] * (u[i + 1] - u[i])
-
         if self.order == 2:
-
-            # Alternative 1: makes use of the fact that solution is positive in [-1,0) and negative in (0,1]
+            # Make use of the fact that solution is positive in [-1,0) and negative in (0,1]
             u_tilde[0] = u[1] * (u[1] - u[0])
             u_tilde[1:int((n - 1) / 2)] = u[2:int((n - 1) / 2)+1] * (3 * u[2:int((n - 1) / 2)+1] -
                                                                      4 * u[1:int((n - 1) / 2)] +
@@ -57,22 +50,6 @@ class BurgersUpwind(BurgersNumericalSolver):
                                                                        3 * u[int((n + 1) / 2)+1:n])
             u_tilde[n - 1] = u[n] * (u[n + 1] - u[n])
             u_tilde = u_tilde / 2
-
-            # Alternative 2: does not make use of the above -> slower
-            # if u[1] < 0:
-            #     u_tilde[0] = u[1] * (u[2] - u[1])
-            # else:
-            #     u_tilde[0] = u[1] * (u[1] - u[0])
-            # if u[n] < 0:
-            #     u_tilde[n - 1] = u[n] * (u[n + 1] - u[n])
-            # else:
-            #     u_tilde[n - 1] = u[n] * (u[n] - u[n - 1])
-            # for i in range(1, n - 1):
-            #     if u[i + 1] < 0:
-            #         u_tilde[i] = u[i + 1] * (-u[i + 3] + 4 * u[i + 2] - 3 * u[i + 1])
-            #     else:
-            #         u_tilde[i] = u[i + 1] * (3 * u[i + 1] - 4 * u[i] + u[i - 1])
-            # u_tilde = u_tilde/2
 
         return u_tilde / self.h
 
