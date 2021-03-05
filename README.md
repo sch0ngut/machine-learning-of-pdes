@@ -1,5 +1,5 @@
 # Machine Learning of PDEs
-This repository contains the code of my Master thesis with the title "Physics Informed Machine Learning of Nonlinear Partial Differential Equations".
+This repository contains the code of my master thesis with the title *Physics Informed Machine Learning of Nonlinear Partial Differential Equations*.
 
 The class definitions for the numerical and the machine learning solver are found in [numerical_solvers] and [machine_learning_solvers].
 
