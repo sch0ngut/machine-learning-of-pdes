@@ -1,5 +1,5 @@
 # Machine Learning of PDEs
-This repository contains the code of my master thesis with the title *Physics Informed Machine Learning of Nonlinear Partial Differential Equations*.
+This repository contains the code of my master thesis with the title *Physics Informed Machine Learning of Nonlinear Partial Differential Equations* (see [Thesis.pdf]).
 
 The class definitions for the numerical and the machine learning solver are found in [numerical_solvers] and [machine_learning_solvers].
 
@@ -9,6 +9,7 @@ All results of the work can be recreated by running the files in the [scripts] f
 [burgers_exact]: https://github.com/sch0ngut/machine-learning-of-pdes/tree/main/burgers_exact
 [numerical_solvers]: https://github.com/sch0ngut/machine-learning-of-pdes/tree/main/numerical_solvers
 [machine_learning_solvers]: https://github.com/sch0ngut/machine-learning-of-pdes/blob/main/machine_learning_solver/PINN.py
+[Thesis.pdf]: https://github.com/sch0ngut/machine-learning-of-pdes/blob/main/Thesis.pdf
 
 ## Abstract
 Finding approximate solutions to nonlinear partial differential equations given some initial and boundary conditions is a well studied task within the field of numerical analysis. Nevertheless, numerical methods face several limitations with respect to the complexity of the underlying problem and the related computational effort.
