@@ -15,7 +15,7 @@ pinn.perform_training(max_n_epochs=1000, min_mse=0.05, track_losses=True, batch_
 print(pinn.loss_df)
 generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat, legend_loc='center left')
 # generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat, legend_loc='center left',
-#                                     savefig_path='scripts/Allen_Cahn/run_PINN/Fig10_PINN_contour_and_snapshots_plot.jpg')
+#                                     savefig_path='plots/Fig10_PINN_contour_and_snapshots_plot.jpg')
 
 # Part 2: use initial initial condition predicted by PINN for FTCS
 
@@ -32,7 +32,7 @@ ftcs.time_integrate()
 # Plot
 generate_contour_and_snapshots_plot(u=ftcs.u_numerical)
 # generate_contour_and_snapshots_plot(u=ftcs.u_numerical,
-#                                     savefig_path='scripts/Allen_Cahn/run_PINN/Fig12_FTCS_with_PINN_IC_contour_and_snapshots_plot.jpg')
+#                                     savefig_path='plots/Fig12_FTCS_with_PINN_IC_contour_and_snapshots_plot.jpg')
 
 # Compute error between Upwind and PINN solution
 x = np.linspace(-1, 1, n_spatial)

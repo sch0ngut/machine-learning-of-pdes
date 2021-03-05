@@ -5,4 +5,4 @@ ftcs = BurgersFTCS(n_spatial=2561, n_temporal=10**4+1)
 ftcs.time_integrate()
 print(ftcs.get_l2_error())
 generate_snapshots_plot(u=ftcs.u_numerical, t_vec=np.array([0, 0.03, 0.04]))
-# Zoomed and saved under 'scripts/Burgers/3.1_FTCS/Fig2a_instabilities.jpg'
+# Zoomed and saved under 'plots/Fig2a_instabilities.jpg'

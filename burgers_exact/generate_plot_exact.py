@@ -9,5 +9,5 @@ n_temporal = 1001
 _, _, u_exact = burgers_data_loader(n_spatial=n_spatial, n_temporal=n_temporal)
 
 # generate_contour_and_snapshots_plot(u=u_exact)
-generate_contour_and_snapshots_plot(u=u_exact, savefig_path='burgers_exact/burgers_exact.jpg')
+generate_contour_and_snapshots_plot(u=u_exact, savefig_path='plots/Fig1_burgers_exact.jpg')
 
