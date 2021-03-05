@@ -9,8 +9,7 @@ pinn.perform_training(min_mse=0.0005, track_losses=True, batch_size='full')
 # Plot solution
 generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat)
 # generate_contour_and_snapshots_plot(pinn.u_pred, train_feat=pinn.train_feat,
-#                                     savefig_path='scripts/Burgers/run_PINN/first_solver/'
-#                                                  'Fig4_contour_and_snapshots_plot.jpg')
+#                                     savefig_path='plots/Fig4_contour_and_snapshots_plot.jpg')
 
 # Plot loss: overall training loss
 plot_df1 = pinn.loss_df[['loss_train', 'loss_coll', 'error']]
@@ -28,7 +27,7 @@ label_dict1 = {
 
 generate_loss_plot(plot_df1, color_dict=color_dict1, label_dict=label_dict1)
 # generate_loss_plot(plot_df1, color_dict=color_dict1, label_dict=label_dict1,
-#                    savefig_path='scripts/Burgers/run_PINN/first_solver/Fig5_loss_plot1.jpg')
+#                    savefig_path='plots/Fig5_loss_plot1.jpg')
 
 # Plot loss: training loss split in loss on initial and boundary conditions
 plot_df2 = pinn.loss_df[['loss_IC', 'loss_BC', 'loss_coll', 'error']]
@@ -47,5 +46,5 @@ label_dict2 = {
 }
 generate_loss_plot(plot_df2, color_dict=color_dict2, label_dict=label_dict2)
 # generate_loss_plot(plot_df2, color_dict=color_dict2, label_dict=label_dict2,
-#                    savefig_path='scripts/Burgers/run_PINN/first_solver/Fig8_loss_plot2.jpg')
+#                    savefig_path='plots/Fig8_loss_plot2.jpg')
 

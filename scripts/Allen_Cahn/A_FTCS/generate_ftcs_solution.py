@@ -6,4 +6,4 @@ ftcs.time_integrate()
 print(ftcs.get_l2_error())
 generate_contour_and_snapshots_plot(u=ftcs.u_numerical)
 # generate_contour_and_snapshots_plot(u=ftcs.u_numerical,
-#                                     savefig_path='scripts/Allen_Cahn/A_FTCS/Fig11_contour_and_snapshots_plot.jpg')
+#                                     savefig_path='plots/Fig11_contour_and_snapshots_plot.jpg')

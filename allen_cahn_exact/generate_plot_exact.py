@@ -7,5 +7,5 @@ from util.generate_plots import *
 _, _, u_exact = allen_cahn_data_loader()
 
 # generate_contour_and_snapshots_plot(u=u_exact)
-generate_contour_and_snapshots_plot(u=u_exact, savefig_path='allen_cahn_exact/allen_cahn_exact.jpg')
+generate_contour_and_snapshots_plot(u=u_exact, savefig_path='plots/allen_cahn_exact.jpg')
 

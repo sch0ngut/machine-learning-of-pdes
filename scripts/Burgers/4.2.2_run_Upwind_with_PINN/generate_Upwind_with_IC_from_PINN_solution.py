@@ -25,8 +25,7 @@ upwind.time_integrate()
 # Plot both solutions
 generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical)
 # generate_two_contour_and_snapshots_plots(u1=pinn.u_pred, u2=upwind.u_numerical, train_feat=pinn.train_feat,
-#                                          savefig_path=f'scripts/Burgers/4.2.2_run_Upwind_with_PINN/'
-#                                                       f'Fig7_PINN_and_Upwind.jpg')
+#                                          savefig_path=f'plots/Fig7_PINN_and_Upwind.jpg')
 
 # Compute l2 error between Upwind and PINN solution
 x = np.linspace(-1, 1, n_spatial)
